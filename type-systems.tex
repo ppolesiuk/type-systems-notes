@@ -6,6 +6,10 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 
+\usepackage{tocbibind} % Bibliography in TOC
+\usepackage[square]{natbib}
+\bibliographystyle{plainnat}
+
 \title{Lecture Notes on Type Systems}
 \author{Piotr Polesiuk (editor)}
 \date{\today}
@@ -23,4 +27,6 @@
   \mainmatter
   \include{chapter/syntax.tex}
   \include{chapter/semantics.tex}
+
+  \bibliography{references}
 \end{document}
