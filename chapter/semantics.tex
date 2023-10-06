@@ -3,17 +3,65 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotational Semantics}
 
+$[\![ \cdot ]\!] : Term \times (Var \rightarrow \mathcal{D}) \rightarrow \mathcal{D}_{\bot}$
+
+$[\![ x ]\!]_\rho = \rho(x)$
+
+$[\![ \lambda x.t ]\!]_\rho = \psi(\lambda v.[\![t]\!]_{\rho [x \mapsto v]})$
+
+$[\![ t_1 t_2 ]\!]_\rho = \varphi[\![t_1]\!]_\rho \varphi[\![t_2]\!]_\rho$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Expressions, Values, and Operational Semantics}
+
+$e ::= v | e e$
+
+$v ::= \lambda x.e | x$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Operational Semantics}
 
+$$ \frac{}{(\lambda x.e) v \rightarrow e\{v/x\}} $$
+$$ \frac{e_1 \rightarrow e_1'}{e_1 e_2 \rightarrow e_1' e_2} $$
+$$ \frac{e \rightarrow e'}{v e \rightarrow v e'} $$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evaluation Contexts and Reduction Semantics}
 
+$$ \frac{}{(\lambda x.e) v \rightharpoonup e\{v/x\}} $$
+$$ \frac{e_1 \rightharpoonup e_2}{E[e_1] \rightarrow E[e_2]} $$
+
+$E ::= \square | E e | v E$
+
+outside-in:
+
+$\square[e] = e$
+
+$(E e')[e] = E[e] e'$
+
+$(v E)[e] = v E[e]$
+
+inside-out:
+
+$\square[e] = e$
+
+$(E e')[e] = E[e e']$
+
+$(v E)[e] = E[v e]$
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Programs, and Non-local Reductions: \texttt{call/cc}}
+
+$p ::= e$
+
+$e ::= v | e e | \mathcal{K} x.e | \mathcal{A}.p$
+
+$v ::= x | \lambda x.e$
+
+$E[\mathcal{K} x.e] \rightarrow E[e\{\lambda y.\mathcal{A}.E[y]/x\}]$
+
+$E[\mathcal{A} p] \rightarrow p$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
