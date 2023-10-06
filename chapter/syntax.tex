@@ -9,5 +9,54 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Variable Binding via Indexed Families of Sets}
 
+$Term_{X}$ is smallest set, such that:
+
+\begin{itemize}
+  \item $\forall_{x \in X}. \widehat{x} \in Term_{X}$
+  \item $\forall_{t \in Term_{X+1}}. \lambda t \in Term_X$
+  \item $\forall_{t_1, t_2 \in Term_X}. t_1 t_2 \in Term_X$
+\end{itemize}
+
+$X+1$ is defined as:
+
+\begin{itemize}
+  \item $0 \in X+1$
+  \item $\forall_{x \in X}. S(x) \in X+1$
+\end{itemize}
+
+$^* : (X \rightarrow Term_Y) \rightarrow Term_X \rightarrow Term_Y$ (also known as \texttt{bind})
+
+$f^*x = f x $
+
+$f^*(\lambda t) = \lambda f^{\Uparrow*} t $
+
+$f^*(t_1 t_2) = (f^* t_1) (f^* t_2)$
+
+\medskip
+
+$^\Uparrow : (X \rightarrow Term_Y) \rightarrow X+1 \rightarrow Term_{Y+1}$
+
+$f^\Uparrow 0 = \widehat{0}$
+
+$f^\Uparrow (S x) = S^\dagger(f x)$
+
+\medskip
+
+$^\dagger : (X \rightarrow Y) \rightarrow Term_X \rightarrow Term_Y$ (also known as \texttt{fmap})
+
+$f^\dagger\widehat{x} = \widehat{f x}$
+
+$f^\dagger(\lambda t) = \lambda f^{\uparrow\dagger}t$
+
+$f^\dagger(t_1 t_2) = (f^\dagger t_1) (f^\dagger t_2)$
+
+\medskip
+
+$\uparrow : (X \rightarrow Y) \rightarrow X+1 \rightarrow Y+1$ (also known as \texttt{fmap} but on \texttt{Maybe})
+
+$f^\uparrow 0 = 0$
+
+$f^\uparrow (S x) = S(f^\uparrow x)$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
