@@ -9,54 +9,61 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Variable Binding via Indexed Families of Sets}
 
-$Term_{X}$ is smallest set, such that:
+% Indexed family of sets of terms
+\newcommand\ITerm[1]{\mathrm{Term}_{#1}}
+% Variable constructor
+\newcommand\ITVar[1]{\ulcorner #1 \urcorner}
+% Successor (constructor of X+1)$
+\newcommand\ITSucc{\mathsf{s}}
+% Extending set by one element
+\newcommand\ITInc[1]{#1\!+\!1}
+
+$\ITerm{X}$ is smallest set, such that:
 
 \begin{itemize}
-  \item $\forall_{x \in X}. \widehat{x} \in Term_{X}$
-  \item $\forall_{t \in Term_{X+1}}. \lambda t \in Term_X$
-  \item $\forall_{t_1, t_2 \in Term_X}. t_1 t_2 \in Term_X$
+\item $\forall x \in X\ldotp \ITVar{x} \in \ITerm{X}$
+\item $\forall t \in \ITerm{X+1}\ldotp \lambda t \in \ITerm{X}$
+\item $\forall t_1, t_2 \in \ITerm{X}\ldotp t_1\;t_2 \in \ITerm{X}$
 \end{itemize}
 
-$X+1$ is defined as:
+$\ITInc{X}$ is isomorphic to \texttt{Maybe} or \texttt{option}
+and is defined as:
 
 \begin{itemize}
-  \item $0 \in X+1$
-  \item $\forall_{x \in X}. S(x) \in X+1$
+\item $0 \in \ITInc{X}$
+\item $\forall x \in X\ldotp \ITSucc\;x \in \ITInc{X}$
 \end{itemize}
 
-$^* : (X \rightarrow Term_Y) \rightarrow Term_X \rightarrow Term_Y$ (also known as \texttt{bind})
+$^* \colon (X \to \ITerm{Y}) \to \ITerm{X} \to \ITerm{Y}$ (also known as \texttt{bind})
 
-$f^*x = f x $
+\begin{eqnarray*}
+  f^*\ITVar{x}   & = & f\;x \\
+  f^*(\lambda t) & = & \lambda (f^{\Uparrow*} \; t) \\
+  f^*(t_1\;t_2)  & = & (f^* \; t_1) \; (f^* \; t_2)
+\end{eqnarray*}
 
-$f^*(\lambda t) = \lambda f^{\Uparrow*} t $
+$^\Uparrow \colon (X \to \ITerm{Y}) \to \ITInc{X} \to \ITerm{\ITInc{Y}}$
 
-$f^*(t_1 t_2) = (f^* t_1) (f^* t_2)$
+\begin{eqnarray*}
+  f^\Uparrow 0 & = & \ITVar{0} \\
+  f^\Uparrow (\ITSucc \; x) & = & \ITSucc^\dagger\;(f\;x) \\
+\end{eqnarray*}
 
-\medskip
+$^\dagger \colon (X \to Y) \to \ITerm{X} \to \ITerm{Y}$ (also known as \texttt{fmap})
 
-$^\Uparrow : (X \rightarrow Term_Y) \rightarrow X+1 \rightarrow Term_{Y+1}$
+\begin{eqnarray*}
+  f^\dagger\ITVar{x}   & = & \ITVar{f\;x} \\
+  f^\dagger(\lambda t) & = & \lambda(f^{\uparrow\dagger}\;t) \\
+  f^\dagger(t_1\;t_2)  & = & (f^\dagger\;t_1)\;(f^\dagger\;t_2)
+\end{eqnarray*}
 
-$f^\Uparrow 0 = \widehat{0}$
+$\uparrow \colon (X \to Y) \to \ITInc{X} \to \ITInc{Y}$
+  (also known as \texttt{fmap} but on \texttt{Maybe})
 
-$f^\Uparrow (S x) = S^\dagger(f x)$
-
-\medskip
-
-$^\dagger : (X \rightarrow Y) \rightarrow Term_X \rightarrow Term_Y$ (also known as \texttt{fmap})
-
-$f^\dagger\widehat{x} = \widehat{f x}$
-
-$f^\dagger(\lambda t) = \lambda f^{\uparrow\dagger}t$
-
-$f^\dagger(t_1 t_2) = (f^\dagger t_1) (f^\dagger t_2)$
-
-\medskip
-
-$\uparrow : (X \rightarrow Y) \rightarrow X+1 \rightarrow Y+1$ (also known as \texttt{fmap} but on \texttt{Maybe})
-
-$f^\uparrow 0 = 0$
-
-$f^\uparrow (S x) = S(f^\uparrow x)$
+\begin{eqnarray*}
+  f^\uparrow 0            & = & 0 \\
+  f^\uparrow (\ITSucc\;x) & = & \ITSucc(f^\uparrow \; x)
+\end{eqnarray*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
