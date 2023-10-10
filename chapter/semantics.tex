@@ -3,65 +3,91 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotational Semantics}
 
-$[\![ \cdot ]\!] : Term \times (Var \rightarrow \mathcal{D}) \rightarrow \mathcal{D}_{\bot}$
+\[
+\llbracket \cdot \rrbracket \colon
+  \mathrm{Term} \times (\mathrm{Var} \rightarrow \mathcal{D}) \rightarrow \mathcal{D}_{\bot}
+\]
 
-$[\![ x ]\!]_\rho = \rho(x)$
-
-$[\![ \lambda x.t ]\!]_\rho = \psi(\lambda v.[\![t]\!]_{\rho [x \mapsto v]})$
-
-$[\![ t_1 t_2 ]\!]_\rho = \varphi[\![t_1]\!]_\rho \varphi[\![t_2]\!]_\rho$
+\begin{alignat*}{2}
+  \llbracket x \rrbracket_\rho & = \rho(x) \\
+  \llbracket \lambda x.t \rrbracket_\rho & =
+    \psi(\mathbf{\lambda} v. \llbracket t \rrbracket_{\rho [x \mapsto v]}) \\
+  \llbracket t_1 \; t_2 \rrbracket_\rho & =
+    \varphi(\llbracket t_1 \rrbracket_\rho) \llbracket t_2 \rrbracket_\rho
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Expressions, Values, and Operational Semantics}
 
-$e ::= v | e e$
-
-$v ::= \lambda x.e | x$
+\begin{alignat*}{2}
+  e & \Coloneqq v \mid e\;e         \tag{expressions} \\
+  v & \Coloneqq \lambda x.e \mid x  \tag{values}
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Operational Semantics}
 
-$$ \frac{}{(\lambda x.e) v \rightarrow e\{v/x\}} $$
-$$ \frac{e_1 \rightarrow e_1'}{e_1 e_2 \rightarrow e_1' e_2} $$
-$$ \frac{e \rightarrow e'}{v e \rightarrow v e'} $$
+\begin{mathpar}
+  \inferrule{\phantom{e}}
+            {(\lambda x.e)\;v \longrightarrow e\{v/x\}}
+  
+  \inferrule{e_1 \longrightarrow e_1'}
+            {e_1 \; e_2 \longrightarrow e_1' \; e_2}
+
+  \inferrule{e \longrightarrow e'}
+            {v \; e \longrightarrow v \; e'}
+\end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evaluation Contexts and Reduction Semantics}
 
-$$ \frac{}{(\lambda x.e) v \rightharpoonup e\{v/x\}} $$
-$$ \frac{e_1 \rightharpoonup e_2}{E[e_1] \rightarrow E[e_2]} $$
+\begin{mathpar}
+  \inferrule{\phantom{e}}
+            {(\lambda x.e) \; v \rightharpoonup e\{v/x\}}
 
-$E ::= \square | E e | v E$
+  \inferrule{e_1 \rightharpoonup e_2}
+            {E[e_1] \longrightarrow E[e_2]}
+\end{mathpar}
+
+\begin{alignat*}{2}
+  E & \Coloneqq \square \mid E \; e \mid v \; E
+\end{alignat*}
+
+Evaluation contexts can be represented in two styles:
+\emph{outside-in} and \emph{inside-out}.
+For this simple case (CBV lambda calculus) the grammar is the same,
+but they differ in the \emph{plug} operation.
 
 outside-in:
-
-$\square[e] = e$
-
-$(E e')[e] = E[e] e'$
-
-$(v E)[e] = v E[e]$
+\begin{alignat*}{2}
+  \square[e] & = e        \\
+  (E\;e')[e] & = E[e]\;e' \\
+  (v\;E)[e]  & = v\;E[e]
+\end{alignat*}
 
 inside-out:
-
-$\square[e] = e$
-
-$(E e')[e] = E[e e']$
-
-$(v E)[e] = E[v e]$
-
+\begin{alignat*}{2}
+  \square[e] & = e       \\
+  (E\;e')[e] & = E[e e'] \\
+  (v\;E)[e]  & = E[v e]
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Programs, and Non-local Reductions: \texttt{call/cc}}
 
-$p ::= e$
+\begin{alignat*}{2}
+  p & \Coloneqq e
+    \tag{programs} \\
+  e & \Coloneqq v \mid e\;e \mid \mathcal{K} x.e \mid \mathcal{A} p
+    \tag{expressions} \\
+  v & \Coloneqq x \mid v
+    \tag{values}
+\end{alignat*}
 
-$e ::= v | e e | \mathcal{K} x.e | \mathcal{A}.p$
-
-$v ::= x | \lambda x.e$
-
-$E[\mathcal{K} x.e] \rightarrow E[e\{\lambda y.\mathcal{A}.E[y]/x\}]$
-
-$E[\mathcal{A} p] \rightarrow p$
+\begin{alignat*}{2}
+  E[\mathcal{K} x.e] & \longrightarrow E[e\{\lambda y.\mathcal{A} E[y] / x\}] \\
+  E[\mathcal{A} p]   & \longrightarrow p
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
