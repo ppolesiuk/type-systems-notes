@@ -6,6 +6,66 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Classic Approach to Variable Binding}
 
+\newcommand\Preterm{\mathrm{Preterm}}
+\newcommand\Var{\mathrm{Var}}
+\newcommand\Subst[3]{#1\{#2/#3\}}
+
+$\Preterm$ is smallest set, such that:
+
+\begin{itemize}
+\item $\forall x \in \Var\ldotp x \in \Preterm$
+\item $\forall x \in \Var\ldotp\forall t \in \Preterm\ldotp \lambda x.t \in \Preterm$
+\item $\forall t_1, t_2 \in \Preterm\ldotp t_1\;t_2 \in \Preterm$
+\end{itemize}
+
+Probem: some distinct preterms such as $\lambda x \ldotp x$ and $\lambda y \ldotp y$
+differ in bound variable names, but represent the same computation.
+
+Solution: $\alpha$-equivalence relation - terms that differ only in the
+names of bound variables will belong to the same equivalence class.
+
+But first, substitution on preterms (partial function):
+
+\[
+  \Subst{\cdot}{\cdot}{\cdot} \colon
+  \Preterm \times \Var \times \Preterm \to \Preterm
+\]
+\begin{eqnarray*}
+  \Subst{x}{t}{x}          & = & t \\
+  \Subst{y}{t}{x}          & = & y, \text{if } x \ne y \\
+  \Subst{(t_1\;t_2)}{t}{x} & = & (\Subst{t_1}{t}{x})\;(\Subst{t_1}{t}{x}) \\
+  \Subst{(\lambda x.t')}{t}{x} & = & \lambda x.t' \\
+  \Subst{(\lambda y.t')}{t}{x} & = & \lambda y.\Subst{t'}{t}{x}, \text{if } x \ne y \land y \not\in FV(t)
+\end{eqnarray*}
+
+$\alpha$-equivalence relation:
+
+\newcommand\Aeq{\equiv_\alpha}
+
+\begin{mathpar}
+  \inferrule{ }
+            {t \Aeq t}
+  
+  \inferrule{t_1 \Aeq t_2 \\ t_2 \Aeq t_3}
+            {t_1 \Aeq t_3}
+
+  \inferrule{t_2 \Aeq t_1}
+            {t_1 \Aeq t_2}
+
+  \inferrule{ }
+            {x \Aeq x}
+
+  \inferrule{t_1 \Aeq t_1' \\ t_2 \Aeq t_2'}
+            {t_1\;t_2 \Aeq t_1'\;t_2'}
+
+  \inferrule{t_1 \Aeq t_2}
+            {\lambda x.t_1 \Aeq \lambda x.t_2}
+
+  \inferrule{y \not\in FV(t)}
+            {\lambda x.t \Aeq \lambda y.\Subst{t}{y}{x}}
+
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Variable Binding via Indexed Families of Sets}
 
