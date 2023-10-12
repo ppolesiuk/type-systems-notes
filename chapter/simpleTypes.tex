@@ -3,11 +3,152 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simply Typed Lambda Calculus}
 
+\newcommand\CaseTerm[3]{\texttt{case}\;#1\;\texttt{of}\;\iota_1 x.#2\mid\iota_2 x.#3}
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq \tau \to \tau \mid b
+    \tag{types} \\
+  e & \Coloneqq v \mid e\;e
+    \tag{expressions} \\
+  v & \Coloneqq x \mid \lambda x.e \mid c_b
+    \tag{values}
+\end{alignat*}
+
+$\Gamma\vdash e : \tau$ - In context $\Gamma$ expression $e$ has type $\tau$
+
+$\Gamma ::= \emptyset \mid \Gamma, x : \tau$
+
+$(x:\tau) \Leftrightarrow \Gamma(x) = \tau$
+
+$\Gamma, x:\tau \Leftrightarrow \Gamma[x \mapsto \tau]$
+
+\begin{mathpar}
+  \inferrule{ }
+            {\Gamma\vdash c_b : b}
+
+  \inferrule{(e : \tau) \in \Gamma}
+            {\Gamma\vdash x : \tau}
+    
+  \inferrule{\Gamma, x : \tau_1 \vdash e : \tau_2}
+            {\Gamma\vdash \lambda x.e : \tau_1 \to \tau_2}
+  
+  \inferrule{\Gamma\vdash e_1 : \tau_2 \to \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
+            {\Gamma\vdash e_1\;e_2 : \tau_1}
+\end{mathpar}
+
+We can also add product type (tuple) and sum type (coproduct / union) to our calculus:
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq ... \mid \tau\times\tau \mid \tau+\tau
+    \tag{types} \\
+  e & \Coloneqq ... \mid (e,e) \mid \pi_{1,2} e \mid \iota_{1,2} e \mid \CaseTerm{e}{e}{e}
+    \tag{expressions} \\
+  v & \Coloneqq ... \mid \langle v, v \rangle \mid \iota_{1,2}^v v
+    \tag{values}
+\end{alignat*}
+
+Typing rules for (co)product type:
+
+\begin{mathpar}
+  \inferrule{\Gamma\vdash e_1 : \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
+            {\Gamma\vdash (e_1, e_2) : \tau_1\times\tau_2}
+
+  \inferrule{\Gamma\vdash (e_1, e_2) : \tau_1\times\tau_2}
+            {\Gamma\vdash \pi_i (e_1,e_2) : \tau_i}
+            (i=1,2)
+
+  \\\\
+
+  \inferrule{\Gamma\vdash e : \tau_i}
+            {\Gamma\vdash \iota_i e : \tau_1+\tau_2}
+            (i=1,2)
+
+  \inferrule{\Gamma\vdash e : \tau_1+\tau_2 \\ \Gamma, x : \tau_i \vdash e_i : \tau\ (i=1,2)}
+            {\Gamma\vdash \CaseTerm{e}{e_1}{e_2} : \tau}
+\end{mathpar}
+
+We then need to extend reduction semantics with the following rules:
+
+\begin{mathpar}
+  \inferrule{ }{(v_1, v_2) \rightharpoonup \langle v_1, v_2 \rangle}
+
+  \inferrule{ }{\pi_i \langle v_1, v_2 \rangle \rightharpoonup v_i}
+
+  \\\\
+
+  \inferrule{ }{\iota_i v \rightharpoonup \iota_i^v v}
+  
+  \inferrule{ }{\CaseTerm{\iota_i v}{e_1}{e_2} \rightharpoonup e_i\{v/x\}}
+\end{mathpar}
+
+and evaluation context:
+
+$E = ... \mid (E,e) \mid (v,E) \mid \pi_i E \mid \iota_i E \mid (\CaseTerm{E}{e_1}{e_2})$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Curry-Howard Isomorphism}
 
+Now, let's remove all terms from typing rules above, replace $\times$ with $\land$,
+$+$ with $\lor$ and squint our eyes a little. What do we see? A wild natural deduction appears!
+
+\begin{mathpar}
+  \inferrule{\tau \in \Gamma}
+            {\Gamma\vdash \tau}
+  
+  \\\\
+
+  \inferrule{\Gamma, \tau_1 \vdash \tau_2}
+            {\Gamma\vdash \tau_1 \to \tau_2}
+  
+  \inferrule{\Gamma\vdash \tau_2 \to \tau_1 \\ \Gamma\vdash \tau_2}
+            {\Gamma\vdash \tau_1}
+
+  \\\\
+          
+  \inferrule{\Gamma\vdash \tau_1 \\ \Gamma\vdash \tau_2}
+            {\Gamma\vdash \tau_1 \land \tau_2}
+
+  \inferrule{\Gamma\vdash \tau_1 \land \tau_2}
+            {\Gamma\vdash \tau_i}
+
+  \\\\
+
+  \inferrule{\Gamma\vdash \tau_i}
+            {\Gamma\vdash \tau_1 \lor \tau_2}
+
+  \inferrule{\Gamma\vdash \tau_1 \lor \tau_2 \\ \Gamma, \tau_i \vdash \tau}
+            {\Gamma\vdash \tau}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Progress and Preservation}
+
+Type-safety: If $\emptyset\vdash e: \tau$ then there is no non-value $e'$
+such that $e \longrightarrow^* e' \not\longrightarrow \cdot$
+
+XX-century technique: progress + type preservation
+
+Progress: $\emptyset\vdash e: \tau$ then $\exists v.e=v$ or $\exists e'.e \longrightarrow e'$
+
+Progress proof for simply typed lambda calculus - induction on type derivation structure
+(exercise for the reader) (will likely require Inversion lemma)
+
+Inversion lemma:
+If $\emptyset\vdash v : \tau_1 \to \tau_2$ then $v = \lambda x.e$ for some x and e
+(Proof is left as an exercise for the reader)
+
+Type Preservation
+$\emptyset\vdash e : \tau$ and $e \longrightarrow e'$ then $\emptyset\vdash e' : \tau$
+(Proof is left as an exercise for the reader)
+
+Substitution lemma:
+If $\Gamma, x:\tau_1 \vdash x : \tau_2$ and $\Gamma\vdash v : \tau_1$
+then $\Gamma\vdash e\{v/x\} : \tau_1$
+(Proof is left as an exercise for the reader - weakening lemma might be useful)
+
+Weakening lemma:
+If $\Gamma\vdash e : \tau$ then $\Gamma, x:\tau' \vdash e : \tau$ where $x\not\in dom(\Gamma)$
+(Proof is left as an exercise for the reader)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
