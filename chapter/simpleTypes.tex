@@ -3,7 +3,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simply Typed Lambda Calculus}
 
-\newcommand\CaseTerm[3]{\texttt{case}\;#1\;\texttt{of}\;\iota_1 x.#2\mid\iota_2 x.#3}
+\newcommand\CaseTerm[3]{\texttt{case}\;#1\;\texttt{of}\;\iota_1\;x.#2\texttt{|}\iota_2\;x.#3}
+\newcommand\iotaval{\iota^{\textsc{v}}}
 
 \begin{alignat*}{2}
   \tau & \Coloneqq \tau \to \tau \mid b
@@ -35,55 +36,6 @@ $\Gamma, x:\tau \Leftrightarrow \Gamma[x \mapsto \tau]$
   \inferrule{\Gamma\vdash e_1 : \tau_2 \to \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
             {\Gamma\vdash e_1\;e_2 : \tau_1}
 \end{mathpar}
-
-We can also add product type (tuple) and sum type (coproduct / union) to our calculus:
-
-\begin{alignat*}{2}
-  \tau & \Coloneqq ... \mid \tau\times\tau \mid \tau+\tau
-    \tag{types} \\
-  e & \Coloneqq ... \mid (e,e) \mid \pi_{1,2} e \mid \iota_{1,2} e \mid \CaseTerm{e}{e}{e}
-    \tag{expressions} \\
-  v & \Coloneqq ... \mid \langle v, v \rangle \mid \iota_{1,2}^v v
-    \tag{values}
-\end{alignat*}
-
-Typing rules for (co)product type:
-
-\begin{mathpar}
-  \inferrule{\Gamma\vdash e_1 : \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
-            {\Gamma\vdash (e_1, e_2) : \tau_1\times\tau_2}
-
-  \inferrule{\Gamma\vdash (e_1, e_2) : \tau_1\times\tau_2}
-            {\Gamma\vdash \pi_i (e_1,e_2) : \tau_i}
-            (i=1,2)
-
-  \\\\
-
-  \inferrule{\Gamma\vdash e : \tau_i}
-            {\Gamma\vdash \iota_i e : \tau_1+\tau_2}
-            (i=1,2)
-
-  \inferrule{\Gamma\vdash e : \tau_1+\tau_2 \\ \Gamma, x : \tau_i \vdash e_i : \tau\ (i=1,2)}
-            {\Gamma\vdash \CaseTerm{e}{e_1}{e_2} : \tau}
-\end{mathpar}
-
-We then need to extend reduction semantics with the following rules:
-
-\begin{mathpar}
-  \inferrule{ }{(v_1, v_2) \rightharpoonup \langle v_1, v_2 \rangle}
-
-  \inferrule{ }{\pi_i \langle v_1, v_2 \rangle \rightharpoonup v_i}
-
-  \\\\
-
-  \inferrule{ }{\iota_i v \rightharpoonup \iota_i^v v}
-  
-  \inferrule{ }{\CaseTerm{\iota_i v}{e_1}{e_2} \rightharpoonup e_i\{v/x\}}
-\end{mathpar}
-
-and evaluation context:
-
-$E = ... \mid (E,e) \mid (v,E) \mid \pi_i E \mid \iota_i E \mid (\CaseTerm{E}{e_1}{e_2})$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Curry-Howard Isomorphism}
@@ -119,6 +71,66 @@ $+$ with $\lor$ and squint our eyes a little. What do we see? A wild natural ded
   \inferrule{\Gamma\vdash \tau_1 \lor \tau_2 \\ \Gamma, \tau_i \vdash \tau}
             {\Gamma\vdash \tau}
 \end{mathpar}
+
+We can also add product type (tuple) and sum type (coproduct / union) to our calculus:
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq \ldots \mid \tau\times\tau \mid \tau+\tau
+    \tag{types} \\
+  e & \Coloneqq \ldots \mid (e,e)
+      \mid \pi_1\;e \mid \pi_2\;e
+      \mid \iota_1\;e \mid \iota_2\;e \mid \CaseTerm{e}{e}{e}
+    \tag{expressions} \\
+  v & \Coloneqq \ldots \mid \langle v, v \rangle
+    \mid \iotaval_1\;v \mid \iotaval_2\;v
+    \tag{values}
+\end{alignat*}
+
+Typing rules for (co)product type:
+
+\begin{mathpar}
+  \inferrule{\Gamma\vdash e_1 : \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
+            {\Gamma\vdash (e_1, e_2) : \tau_1\times\tau_2}
+
+  \inferrule{\Gamma\vdash e : \tau_1\times\tau_2}
+            {\Gamma\vdash \pi_i\;e : \tau_i}
+            (i=1,2)
+
+  \\\\
+
+  \inferrule{\Gamma\vdash e : \tau_i}
+            {\Gamma\vdash \iota_i\;e : \tau_1+\tau_2}
+            (i=1,2)
+
+  \inferrule{\Gamma\vdash e : \tau_1+\tau_2 \\ \Gamma, x : \tau_i \vdash e_i : \tau\ (i=1,2)}
+            {\Gamma\vdash \CaseTerm{e}{e_1}{e_2} : \tau}
+\end{mathpar}
+
+Maybe we should add also typing rules for runtime constructs
+$\langle v_1, v_2 \rangle$ and $\iotaval_i v$.
+
+We then need to extend reduction semantics with the following rules:
+
+\begin{mathpar}
+  \inferrule{ }{(v_1, v_2) \rightharpoonup \langle v_1, v_2 \rangle}
+
+  \inferrule{ }{\pi_i\;\langle v_1, v_2 \rangle \rightharpoonup v_i}
+
+  \\\\
+
+  \inferrule{ }{\iota_i\;v \rightharpoonup \iotaval_i\;v}
+  
+  \inferrule{ }{\CaseTerm{\iotaval_i\;v}{e_1}{e_2} \rightharpoonup e_i\{v/x\}}
+\end{mathpar}
+
+and evaluation context:
+
+\begin{alignat*}{2}
+  E & \Coloneqq \ldots \mid (E,e) \mid (v,E)
+    \mid \pi_1\;E \mid \pi_2\;E
+    \mid \iota_1\;E \mid \iota_2\;E 
+    \mid \CaseTerm{E}{e_1}{e_2}
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Progress and Preservation}
