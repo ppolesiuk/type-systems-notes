@@ -6,6 +6,9 @@
 \newcommand\CaseTerm[3]{\texttt{case}\;#1\;\texttt{of}\;\iota_1\;x.#2\texttt{|}\iota_2\;x.#3}
 \newcommand\iotaval{\iota^{\textsc{v}}}
 
+As pure lambda calculus doesn't have any typeable terms, we need to extend it with
+some atomic values $c_b$ of type $b$, which can for example be numbers or booleans.
+
 \begin{alignat*}{2}
   \tau & \Coloneqq \tau \to \tau \mid b
     \tag{types} \\
@@ -14,6 +17,11 @@
   v & \Coloneqq x \mid \lambda x.e \mid c_b
     \tag{values}
 \end{alignat*}
+
+In contrast to evaluation relation, typing relation does include lambda terms
+and to type the body of a lambda term, we must remember current variable binding.
+As lambda terms can be nested, we must store somewhere a set of assumptions about free variables occurring in a term.
+This place is called context $\Gamma$. \\
 
 $\Gamma\vdash e : \tau$ - In context $\Gamma$ expression $e$ has type $\tau$
 
