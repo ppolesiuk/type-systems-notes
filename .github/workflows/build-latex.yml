@@ -25,22 +25,10 @@ jobs:
           echo "sha_short=$sha_short" >> $GITHUB_OUTPUT
           mv type-systems.pdf $filename
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
+          name: Release ${{ steps.rename_file.outputs.filename }}
           tag_name: ${{ steps.rename_file.outputs.sha_short }}
-          release_name: Release ${{ steps.rename_file.outputs.filename }}
           draft: false
           prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ steps.rename_file.outputs.filename }}
-          asset_name: ${{ steps.rename_file.outputs.filename }}
-          asset_content_type: application/pdf
+          files: ${{ steps.rename_file.outputs.filename }}
