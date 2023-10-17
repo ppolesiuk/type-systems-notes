@@ -45,7 +45,7 @@ $\alpha$-equivalence relation:
 \begin{mathpar}
   \inferrule{ }
             {t \Aeq t}
-  
+
   \inferrule{t_1 \Aeq t_2 \\ t_2 \Aeq t_3}
             {t_1 \Aeq t_3}
 
@@ -78,7 +78,13 @@ $\alpha$-equivalence relation:
 % Extending set by one element
 \newcommand\ITInc[1]{#1\!+\!1}
 
-$\ITerm{X}$ is smallest set, such that:
+Another approach to construct terms is to define a set $\ITerm{X}$,
+where $X$ is a set of variables that are potentially free.
+
+For example $\ITerm{\text{VAR}}$ would contain all terms and
+$\ITerm{\emptyset}$ -- all closed terms (without any free variables).
+
+Formally $\ITerm{X}$ is smallest set, such that:
 
 \begin{itemize}
 \item $\forall x \in X\ldotp \ITVar{x} \in \ITerm{X}$
@@ -93,6 +99,20 @@ and is defined as:
 \item $0 \in \ITInc{X}$
 \item $\forall x \in X\ldotp \ITSucc\;x \in \ITInc{X}$
 \end{itemize}
+
+We should note that we changed $\lambda x.t$ to simply $\lambda t$.
+The role of $x$ now belongs to 0, which may be present in $t \in \ITerm{X+1}$.
+For example term $\lambda x.\lambda y. xy$
+would be written as $\lambda\lambda \ITSucc\;0\;0 = \lambda\lambda 1\;0$.
+
+With the removal of names for bound variables we don't run into the same problems as before.
+The only thing left to do is to define substitution
+\[
+	\cdot\{\cdot\}:
+  \ITerm{X+1} \times \ITerm{X} \to \ITerm{X}
+\]
+
+and to do that we need to define:
 
 $^* \colon (X \to \ITerm{Y}) \to \ITerm{X} \to \ITerm{Y}$ (also known as \texttt{bind})
 
