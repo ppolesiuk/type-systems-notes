@@ -5,22 +5,145 @@
 
 % Some intuitions from propositional logic go here
 
+\newcommand\Denot[1]{\llbracket#1\rrbracket}
+\begin{alignat*}{2}
+  \varphi & \Coloneqq \top \mid \bot \mid \varphi \to \varphi
+\end{alignat*}
+
+$\Denot{\cdot} \colon Formula \to D$
+\begin{alignat*}{2}
+  \Denot{\top} & = \texttt{true} \\
+  \Denot{\bot} & = \texttt{false} \\
+  \Denot{\varphi \to \psi} & = \Denot{\varphi} \Rightarrow \Denot{\psi}
+\end{alignat*}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotation of Types}
+
+$\textbf{Type} = \mathcal{P}(Value_{\emptyset})$ (sets of closed values)
+
+$\Denot{\cdot} \colon Type \to \textbf{Type}$ - denotation of a type - set of values of that type
+\begin{alignat*}{2}
+  \Denot{\texttt{Unit}} & = \{\texttt{()}\} \\
+  \Denot{\tau_1 \to \tau_2} & = \{ v \mid \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \}
+\end{alignat*}
+
+$\mathcal{E} \colon \textbf{Type} \to \mathcal{P}(Expr_{\emptyset})$
+
+$\mathcal{E}R = \{ e \mid \forall e'\ldotp e \to^* e' \Rightarrow (\exists v \in R \ldotp e'=v) \lor (\exists e'' \ldotp e'\to^*e'') \}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Logical Relation}
 
 % From denotation of types to open expressions
 
+$\Denot{\Gamma} = \{\gamma \mid \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)}\}$
+($\gamma \in \Denot{\Gamma} \Longleftrightarrow \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)} $)
+
+$\gamma \colon X \to Value_{\emptyset}$
+
+$\Gamma \models e : \tau \Longleftrightarrow \forall \gamma \in \Denot{\Gamma}\ldotp \gamma^*(e) \in \mathcal{E}\Denot{\tau}$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Soundness}
 
 % Compatibility Lemmas, Fundamental Property, Adequacy, and Type Safety
 % go here.
+\newtheorem*{theorem}{Theorem}
+
+\begin{theorem}[Fundamental Property]
+  If $\Gamma \vdash e : \tau$ then $\Gamma \models e : \tau$
+\end{theorem}
+
+\begin{theorem}[Type safety]
+  If $\emptyset \vdash e : \tau$ then $Safe(e)$
+
+  $Safe(e) = \forall e'\ldotp e\to^*e' \Rightarrow (\exists v\ldotp e'=v) \lor (\exists e''\ldotp e'\to e'')$
+\end{theorem}
+
+\begin{theorem}[Adequacy]
+  $\mathcal{E}R \subseteq Safe$
+\end{theorem}
+
+\newtheorem{lemma}{Lemma}
+
+\begin{lemma}
+  $\forall R \in \textbf{Type}\ldotp \forall v \in R\ldotp v \in \mathcal{E}R$
+\end{lemma}
+
+\begin{lemma}
+  If $e \to e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$
+\end{lemma}
+
+\begin{lemma}
+  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$ and $e_2 \in \mathcal{E}\Denot{\tau_2}$ then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$
+
+  Proof (sketch):
+
+  Pick any $e'$ such that $e_1\;e_2 \to^* e'$
+
+  i. $e_1 \to^* e_1'$ (not a value), then $e' = e_1'\;e_2$
+
+  ii. $e_1 \to^* v_1$, $e_2\to e_2'$ (not a value) $e' = v_1\;e_2'$
+
+  iii. $e_1 \to^* v_1$, $e_2 \to^* v_2$ and $v_1 v_2 \to^* e'$
+\end{lemma}
+
+\newtheorem{compatlemma}{Compatibility lemma}
+
+\begin{compatlemma}
+  $\Gamma \models () : Unit =$
+\end{compatlemma}
+
+\begin{compatlemma}
+  $\Gamma \models x : \Gamma(x)$
+\end{compatlemma}
+
+\begin{compatlemma}
+  If $\Gamma, x:\tau_1 \models e : \tau_2$ then $\Gamma \models \lambda x.e : \tau_1 \to \tau_2$
+\end{compatlemma}
+
+Proof sketch for Compatibility lemma 3:
+
+Take any $\gamma \in \Denot{\Gamma}$
+
+T.S. $\lambda^{\Uparrow*} e \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$
+
+From lemma 1:
+
+T.S. $\lambda^{\Uparrow*} e \in \Denot{\tau_1 \to \tau_2}$
+
+Take any $v \in \Denot{\tau_1}$
+
+T.S. $(\lambda^{\Uparrow*} e)\;v \in \Denot{\tau_2}$
+
+From lemma 2:
+
+T.S. $(\gamma^{\Uparrow*} e)\{v/x\} \in \mathcal{E}\Denot{\tau_2}$
+
+T.S. $(v \triangleleft \gamma)^* \in \mathcal{E}\Denot{\tau_2}$
+
+From induction hypothesis:
+
+T.S. $v \triangleleft \gamma \in \Denot{\Gamma, x : \tau_1}$
+
+\begin{compatlemma}
+  If $\Gamma \models e_1 : \tau_2 \to \tau_1 $ and $\Gamma \models e_2 : \tau_2$ then $\Gamma \models e_1\;e_2 : \tau_1$
+\end{compatlemma}
+Proof using lemma 3.
+
+\medskip
+
+Using Compatibility Lemmas proof of Fundamental Property is straightforward induction.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Termination of Simply-Typed Lambda Calculus}
+
+If $\emptyset \vdash e : \tau$ then $\exists v\ldotp e \to^* v$
+
+To prove termination we will change definition of $\mathcal{E}$ to reflect that fact.
+
+$\mathcal{E}R = \{ e \mid \exists v \in R\ldotp e \to^* v \}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
