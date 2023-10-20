@@ -1,5 +1,6 @@
 -R . Top
 ProgressAndPreservation.v
+SafetyLogicalRelation.v
 SemanticsSOS.v
 Syntax.v
 Typing.v
