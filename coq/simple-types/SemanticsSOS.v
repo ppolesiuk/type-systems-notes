@@ -58,6 +58,13 @@ Proof.
   induction 1; econstructor; [ apply red_app1 | ]; eassumption.
 Qed.
 
+Lemma red_rtc_app2 {A : Set} (v : value A) (e e' : expr A) :
+  red_rtc e e' →
+  red_rtc (e_app v e) (e_app v e').
+Proof.
+  induction 1; econstructor; [ apply red_app2 | ]; eassumption.
+Qed.
+
 Lemma value_red_rtc_to_value {A : Set} (v : value A) e :
   red_rtc v e → is_value e.
 Proof.
