@@ -6,7 +6,7 @@
 \newcommand\CaseTerm[3]{\texttt{case}\;#1\;\texttt{of}\;\iota_1\;x.#2\texttt{|}\iota_2\;x.#3}
 \newcommand\iotaval{\iota^{\textsc{v}}}
 
-As pure lambda calculus doesn't have any typeable terms, we need to extend it with
+As pure lambda calculus has empty grammar of types, we need to extend it with
 some atomic values $c_b$ of type $b$, which can for example be numbers or booleans.
 
 \begin{alignat*}{2}
@@ -18,10 +18,9 @@ some atomic values $c_b$ of type $b$, which can for example be numbers or boolea
     \tag{values}
 \end{alignat*}
 
-In contrast to evaluation relation, typing relation does include lambda terms
-and to type the body of a lambda term, we must remember current variable binding.
+To derive a type of lambda abstraction, we need to first derive it for its body, remembering that current variable is bound to some type.
 As lambda terms can be nested, we must store somewhere a set of assumptions about free variables occurring in a term.
-This place is called context $\Gamma$. \\
+This place is called environment $\Gamma$. \\
 
 $\Gamma\vdash e : \tau$ - In context $\Gamma$ expression $e$ has type $\tau$
 
