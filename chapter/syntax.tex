@@ -78,11 +78,76 @@ $\alpha$-equivalence relation:
 % Extending set by one element
 \newcommand\ITInc[1]{#1\!+\!1}
 
-Another approach to construct terms is to define a set $\ITerm{X}$,
-where $X$ is a set of variables that are potentially free.
+While the treatment of variable binding in the previous section is close
+to intuitive meaning, the construction is bit involved and not very convenient
+when we work with proof assistants, like Coq.
+In this section we present another approach that do not require
+any quotient sets.
+In order to avoid quotient sets and $\alpha$-equivalence our representation
+should be \emph{nameless}, \emph{i.e.}, bound variables should not have
+any names.
 
-For example $\ITerm{\text{VAR}}$ would contain all terms and
-$\ITerm{\emptyset}$ -- all closed terms (without any free variables).
+One well-known example of a nameless approach is a representation based on
+de Bruijn indices~\citep{deBruijn72}.
+The idea is to uniquely represent a bound variable by a number (index),
+that describes how many other binders we should skip to find
+a corresponding binder.
+For instance, term $\lambda x.\lambda y.x\;y$ will be
+represented as $\lambda\lambda 1\;0$.
+Two things should be noted here.
+First, the lambda abstraction does not store any name,
+because the representation is nameless and
+bound variables are matched with their binders not by name,
+but by counting.
+Secondly, it is not clear how to represent free variables.
+Basically, there are two approaches.
+\begin{itemize}
+\item We can treat indices as free, when they are too big to be bound.
+  As this seems to be natural, it has some drawbacks.
+  Usually, we identify free variables by their names.
+  These names have no additional structure,
+  but have some meaning to the programmer.
+  In this plain de Bruijn representation free variables
+  have no names and we impose some order on then (order on natural numbers)
+  that have no counterpart on our intuitive understanding of variables.
+\item We can have separate notion of free variables (represented by names)
+  and bound variables (represented by indices).
+  Such an approach is called
+  \emph{locally nameless}~\citep{AydemirCPPW08,Chargueraud12}
+  and was successfully applied to some larger Coq or Agda formalizations.
+  However, in this representation we still have to deal with indices
+  too big to be bound, and in order to do so,
+  we work with \emph{locally closed terms}, \emph{i.e.},
+  terms that do not have such a too big indices.
+  Such an additional ``locally closed'' relation introduces some
+  unnecessary clutter into a formalization.
+\end{itemize}
+
+In this section we present another nameless approach,
+that combines advantages of both mentioned approaches.
+We start with the observation that in most cases, when we work
+with open terms, there is a some kind of scope or an environment
+that provides a meaning of free variables.
+In such cases we allow only terms where all free variables
+are in this scope.
+For instance, evaluation function $\texttt{eval}\;\rho\;e$
+accepts only expressions where for each free variable~$x$,
+its meaning $\rho(x)$ is defined in the environment,
+or typing relation $\Gamma\vdash e\;:\:\tau$
+(see \autoref{ch:simple-types})
+requires that all free variables have assigned type in~$\Gamma$.
+Another extreme example is when we work with closed terms:
+their scope is empty and no free variables are allowed.
+
+With this intuition in mind, we can construct a set~$\ITerm{X}$,
+for each set~$X$, that will be called a~set of
+\emph{potentially free} variables.
+We can think about this set of potentially free variables
+as a scope of the term.
+For example $\ITerm{\varnothing}$ contains all closed terms
+(without any free variables),
+while $\ITerm{\Var}$ is a set (isomorphic to a set)
+of terms from the previous section.
 
 Formally $\ITerm{X}$ is smallest set, such that:
 
