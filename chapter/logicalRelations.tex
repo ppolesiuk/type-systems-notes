@@ -49,8 +49,6 @@ $\Gamma \models e : \tau \Longleftrightarrow \forall \gamma \in \Denot{\Gamma}\l
 
 % Compatibility Lemmas, Fundamental Property, Adequacy, and Type Safety
 % go here.
-\newtheorem*{theorem}{Theorem}
-
 \begin{theorem}[Fundamental Property]
   If $\Gamma \vdash e : \tau$ then $\Gamma \models e : \tau$
 \end{theorem}
@@ -65,8 +63,6 @@ $\Gamma \models e : \tau \Longleftrightarrow \forall \gamma \in \Denot{\Gamma}\l
   $\mathcal{E}R \subseteq Safe$
 \end{theorem}
 
-\newtheorem{lemma}{Lemma}
-
 \begin{lemma}
   $\forall R \in \textbf{Type}\ldotp \forall v \in R\ldotp v \in \mathcal{E}R$
 \end{lemma}
@@ -76,61 +72,63 @@ $\Gamma \models e : \tau \Longleftrightarrow \forall \gamma \in \Denot{\Gamma}\l
 \end{lemma}
 
 \begin{lemma}
-  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$ and $e_2 \in \mathcal{E}\Denot{\tau_2}$ then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$
+  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
+  and $e_2 \in \mathcal{E}\Denot{\tau_2}$
+  then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$
+\end{lemma}
+\begin{proof}
+  Pick any $e'$ such that $e_1\;e_2 \to^* e'$.
+  We have three cases:
+  \begin{enumerate}[label=(\roman*)]
+  \item $e_1 \to^* e_1'$ (not a value), then $e' = e_1'\;e_2$;
+  \item $e_1 \to^* v_1$, $e_2\to e_2'$ (not a value) $e' = v_1\;e_2'$;
+  \item $e_1 \to^* v_1$, $e_2 \to^* v_2$ and $v_1\;v_2 \to^* e'$.
+    \qedhere
+  \end{enumerate}
+\end{proof}
 
-  Proof (sketch):
-
-  Pick any $e'$ such that $e_1\;e_2 \to^* e'$
-
-  i. $e_1 \to^* e_1'$ (not a value), then $e' = e_1'\;e_2$
-
-  ii. $e_1 \to^* v_1$, $e_2\to e_2'$ (not a value) $e' = v_1\;e_2'$
-
-  iii. $e_1 \to^* v_1$, $e_2 \to^* v_2$ and $v_1 v_2 \to^* e'$
+\begin{lemma}
+  $\Gamma \models () : Unit$
 \end{lemma}
 
-\newtheorem{compatlemma}{Compatibility lemma}
-
-\begin{compatlemma}
-  $\Gamma \models () : Unit =$
-\end{compatlemma}
-
-\begin{compatlemma}
+\begin{lemma}
   $\Gamma \models x : \Gamma(x)$
-\end{compatlemma}
+\end{lemma}
 
-\begin{compatlemma}
-  If $\Gamma, x:\tau_1 \models e : \tau_2$ then $\Gamma \models \lambda x.e : \tau_1 \to \tau_2$
-\end{compatlemma}
+\begin{lemma}
+  If $\Gamma, x:\tau_1 \models e : \tau_2$
+  then $\Gamma \models \lambda x.e : \tau_1 \to \tau_2$
+\end{lemma}
+\begin{proof}
+  Take any $\gamma \in \Denot{\Gamma}$
 
-Proof sketch for Compatibility lemma 3:
+  T.S. $\lambda^{\Uparrow*} e \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$
 
-Take any $\gamma \in \Denot{\Gamma}$
+  From lemma 1:
 
-T.S. $\lambda^{\Uparrow*} e \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$
+  T.S. $\lambda^{\Uparrow*} e \in \Denot{\tau_1 \to \tau_2}$
 
-From lemma 1:
+  Take any $v \in \Denot{\tau_1}$
 
-T.S. $\lambda^{\Uparrow*} e \in \Denot{\tau_1 \to \tau_2}$
+  T.S. $(\lambda^{\Uparrow*} e)\;v \in \Denot{\tau_2}$
 
-Take any $v \in \Denot{\tau_1}$
+  From lemma 2:
 
-T.S. $(\lambda^{\Uparrow*} e)\;v \in \Denot{\tau_2}$
+  T.S. $(\gamma^{\Uparrow*} e)\{v/x\} \in \mathcal{E}\Denot{\tau_2}$
 
-From lemma 2:
+  T.S. $(v \triangleleft \gamma)^* \in \mathcal{E}\Denot{\tau_2}$
 
-T.S. $(\gamma^{\Uparrow*} e)\{v/x\} \in \mathcal{E}\Denot{\tau_2}$
+  From induction hypothesis:
 
-T.S. $(v \triangleleft \gamma)^* \in \mathcal{E}\Denot{\tau_2}$
+  T.S. $v \triangleleft \gamma \in \Denot{\Gamma, x : \tau_1}$
+\end{proof}
 
-From induction hypothesis:
-
-T.S. $v \triangleleft \gamma \in \Denot{\Gamma, x : \tau_1}$
-
-\begin{compatlemma}
+\begin{lemma}
   If $\Gamma \models e_1 : \tau_2 \to \tau_1 $ and $\Gamma \models e_2 : \tau_2$ then $\Gamma \models e_1\;e_2 : \tau_1$
-\end{compatlemma}
-Proof using lemma 3.
+\end{lemma}
+\begin{proof}
+  Proof using lemma 3.
+\end{proof}
 
 \medskip
 

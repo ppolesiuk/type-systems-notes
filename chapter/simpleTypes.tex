@@ -143,32 +143,80 @@ and evaluation context:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Progress and Preservation}
 
-Type-safety: If $\emptyset\vdash e: \tau$ then there is no non-value $e'$
-such that $e \longrightarrow^* e' \not\longrightarrow \cdot$
+\begin{defin}[Type safety]
+  We say that expression $e$ is \emph{type-safe}, written $\Safe{e}$
+  if for any expressions $e'$ such that $e \longrightarrow^* e'$
+  expression $e'$ is a value, or it makes a step, \emph{i.e.},
+  there exists $e''$ such that $e' \longrightarrow e''$.
+\end{defin}
 
 XX-century technique: progress + type preservation
 
-Progress: $\emptyset\vdash e: \tau$ then $\exists v.e=v$ or $\exists e'.e \longrightarrow e'$
+\begin{theorem}[Progress]
+  If $\emptyset\vdash e : \tau$ then
+  $e$ is a value or there exists expression~$e'$
+  such that $e \longrightarrow e'$.
+\end{theorem}
+\begin{proof}
+  Induction on the derivation of $\emptyset\vdash e : \tau$.
+  Cases for unit value, variable, and lambda abstraction are trivial ---
+  they are already values.
+  For application case ($e_1\;e_2$), by induction hypothesis we have one
+  of the following subcases: either $e_1$ makes a step,
+  $e_1$ is a value and $e_2$ makes a step,
+  or both $e_1$ and $e_2$ are values, $v_1$ and $v_2$ correspondingly.
+  In the first two subcases the whole application makes a step.
+  For the last one, we need to ensure that $v_1$ is a lambda abstraction.
+  While in case of simple types this directly follows from the typing rules,
+  we state this property as a separate inversion lemma (below).
+\end{proof}
 
-Progress proof for simply typed lambda calculus - induction on type derivation structure
-(exercise for the reader) (will likely require Inversion lemma)
+\begin{lemma}[Inversion for arrow type]
+  If $\emptyset\vdash v : \tau_1 \to \tau_2$
+  then $v = \lambda x.e$ for some $x$ and $e$,
+  such that $x:\tau_1 \vdash e : \tau_2$.
+\end{lemma}
+\begin{proof}
+  Directly by the definition of a typing relation.
+  Note that the assumption about the emptiness of the typing environment
+  is crucial, since variables may have an arrow type.
+\end{proof}
 
-Inversion lemma:
-If $\emptyset\vdash v : \tau_1 \to \tau_2$ then $v = \lambda x.e$ for some x and e
-(Proof is left as an exercise for the reader)
+We have defined an inversion lemma as a separate lemma in order
+to make this proof technique more robust.
+In case of some language extensions, like subtyping,
+this lemma is not so trivial and require some additional reasoning.
 
-Type Preservation
-$\emptyset\vdash e : \tau$ and $e \longrightarrow e'$ then $\emptyset\vdash e' : \tau$
-(Proof is left as an exercise for the reader)
+\begin{theorem}
+  Typing relation is preserved by a reduction.
+  More precisely, if $\emptyset \vdash e : \tau$ and $e \longrightarrow e'$ then
+  $\emptyset \vdash e' : \tau$.
+\end{theorem}
+\begin{proof}
+  By induction on the typing derivation.
+  Details are left as an exercise for the reader.
+  In case of reductions that uses substitution ($\beta$-reduction)
+  we need a substitution lemma, which in turn requires weakening lemmas.
+  Both lemmas are stated below.
+\end{proof}
 
-Substitution lemma:
-If $\Gamma, x:\tau_1 \vdash e : \tau_2$ and $\Gamma\vdash v : \tau_1$
-then $\Gamma\vdash e\{v/x\} : \tau_2$
-(Proof is left as an exercise for the reader - weakening lemma might be useful)
+\begin{lemma}[Weakening]
+  If $\Gamma\vdash e : \tau$ then $\Gamma, x:\tau' \vdash e : \tau$
+  for $x\not\in \textsf{dom}(\Gamma)$.
+\end{lemma}
+\begin{proof}
+  By induction on the typing derivation.
+  Details are left as an exercise for the reader.
+\end{proof}
 
-Weakening lemma:
-If $\Gamma\vdash e : \tau$ then $\Gamma, x:\tau' \vdash e : \tau$ where $x\not\in dom(\Gamma)$
-(Proof is left as an exercise for the reader)
+\begin{lemma}[Substitution]
+  If $\Gamma, x:\tau_1 \vdash e : \tau_2$ and $\Gamma\vdash v : \tau_1$
+  then $\Gamma\vdash e\{v/x\} : \tau_2$
+\end{lemma}
+\begin{proof}
+  By induction on the typing derivation.
+  Details are left as an exercise for the reader.
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
