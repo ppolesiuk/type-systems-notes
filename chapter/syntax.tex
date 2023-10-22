@@ -3,54 +3,99 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Grammars and Abstract Syntax Trees}
 
+Throughout the remainder of these lecture notes, we will specify the abstract
+syntax of various elements of the considered calculi in the form of a grammar,
+such as the following grammar of the plain $\lambda$-calculus.
+\begin{alignat*}{2}
+  &x, y, z, \dots \span\span \tag{variables} \\
+  &t &&\Coloneqq x \mid \lambda x\ldotp t \mid t\;t \tag{terms}
+\end{alignat*}
+There are only two syntactic categories in this grammar: variables
+($x, y, z, \dots$) and terms ($t$). A term can be a variable,
+a $\lambda$-abstraction, or an application of one term to another.
+As this grammar is supposed to represent the \emph{abstract syntax trees},
+rather than the strings of any particular concrete syntax, we do not consider
+parentheses, priorities or associativity. When writing such
+terms down, we will use various common conventions, \emph{e.g.}, the
+body of a $\lambda$-abstraction extends as far right as possible, and
+application is left-associative. This allows us to write
+$\lambda x\ldotp t_1\;t_2$ for $\lambda x\ldotp (t_1\;t_2)$
+and $t_1\;t_2\;t_3$ for $(t_1\;t_2)\;t_3$.
+
+Note that the presented grammar says nothing about how the variables are
+represented. It is convenient to abstract away from such
+inconsequential details on paper, and make various assumptions about which
+variables can be safely treated as distinct. However, to ground such
+intuitions and to give us a good foundation for formal reasoning with
+the use of a proof assistant, the following two sections describe
+two concrete approaches to variables and variable binding.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Classic Approach to Variable Binding}
 
 \newcommand\Preterm{\mathrm{Preterm}}
+\newcommand\Term{\mathrm{Term}}
 \newcommand\Var{\mathrm{Var}}
+\newcommand\FVars[1]{\mathrm{fv}(#1)}
 \newcommand\Subst[3]{#1\{#2/#3\}}
+\newcommand\Aeq{\equiv_\alpha}
 
-$\Preterm$ is smallest set, such that:
-
+Let $\Var$ be some infinite set of variable names.
+Then we can define $\Preterm$ as the smallest set such that
 \begin{itemize}
-\item $\forall x \in \Var\ldotp x \in \Preterm$
-\item $\forall x \in \Var\ldotp\forall t \in \Preterm\ldotp \lambda x.t \in \Preterm$
-\item $\forall t_1, t_2 \in \Preterm\ldotp t_1\;t_2 \in \Preterm$
+\item $\forall x \in \Var\ldotp x \in \Preterm$,
+\item $\forall x \in \Var\ldotp\forall t \in \Preterm\ldotp \lambda x\ldotp t \in \Preterm$,
+\item $\forall t_1, t_2 \in \Preterm\ldotp t_1\;t_2 \in \Preterm$.
 \end{itemize}
+At first glance, this definition appears similar to the grammar of the
+$\lambda$-calculus.
+However, if $x \neq y$, then $\lambda x\ldotp x$ and $\lambda y\ldotp y$ are
+not equal, even though they differ only in the choice of bound variable names,
+which does not affect the represented computation. We will define an
+equivalence relation, traditionally known as $\alpha$-equivalence, to identify
+such terms.
 
-Probem: some distinct preterms such as $\lambda x \ldotp x$ and $\lambda y \ldotp y$
-differ in bound variable names, but represent the same computation.
-
-Solution: $\alpha$-equivalence relation - terms that differ only in the
-names of bound variables will belong to the same equivalence class.
-
-But first, substitution on preterms (partial function):
-
+\begin{figure}[t!!]
 \[
   \Subst{\cdot}{\cdot}{\cdot} \colon
-  \Preterm \times \Var \times \Preterm \to \Preterm
+  \Preterm \times \Var \times \Preterm \rightharpoonup \Preterm
 \]
 \begin{eqnarray*}
   \Subst{x}{t}{x}          & = & t \\
-  \Subst{y}{t}{x}          & = & y, \text{if } x \ne y \\
+  \Subst{y}{t}{x}          & = & y, \text{ if } x \ne y \\
   \Subst{(t_1\;t_2)}{t}{x} & = & (\Subst{t_1}{t}{x})\;(\Subst{t_1}{t}{x}) \\
-  \Subst{(\lambda x.t')}{t}{x} & = & \lambda x.t' \\
-  \Subst{(\lambda y.t')}{t}{x} & = & \lambda y.\Subst{t'}{t}{x}, \text{if } x \ne y \land y \not\in FV(t)
+  \Subst{(\lambda x\ldotp t')}{t}{x} & = & \lambda x\ldotp t' \\
+  \Subst{(\lambda y\ldotp t')}{t}{x} & = & \lambda y\ldotp \Subst{t'}{t}{x}, \text{ if } x \ne y \land y \not\in \FVars{t}
 \end{eqnarray*}
+\caption{The substitution operation for preterms.}
+\label{fig:syntax_preterm_subst}
+\end{figure}
 
-$\alpha$-equivalence relation:
+We are going to need a way to rename the variables occurring in preterms.
+More generally, we can define the substitution of entire preterms for
+variables as a partial function, as shown in
+\autoref{fig:syntax_preterm_subst}.
+The case for $\lambda$-abstraction is tricky, since we need to be careful
+to avoid \emph{variable capture}.
+For example, in the substitution $\Subst{(\lambda y\ldotp x)}{y}{x}$,
+we cannot simply substitute under the binder. If we did, we would get
+$\lambda y \ldotp y$, which is clearly incorrect---the free variable $y$ was
+captured by the abstraction!
+Thus, we define $\Subst{(\lambda y\ldotp t')}{t}{x}$ only when $y$ is not in
+the set of free variables of $t$, denoted as $\FVars{t}$. Despite being
+partial, this notion of substitution is sufficient for the purpose of defining
+$\alpha$-equivalence.
 
-\newcommand\Aeq{\equiv_\alpha}
-
+\begin{figure}[t!!]
 \begin{mathpar}
   \inferrule{ }
             {t \Aeq t}
 
-  \inferrule{t_1 \Aeq t_2 \\ t_2 \Aeq t_3}
-            {t_1 \Aeq t_3}
-
   \inferrule{t_2 \Aeq t_1}
             {t_1 \Aeq t_2}
+
+  \inferrule{t_1 \Aeq t_2 \\ t_2 \Aeq t_3}
+            {t_1 \Aeq t_3}
 
   \inferrule{ }
             {x \Aeq x}
@@ -61,10 +106,35 @@ $\alpha$-equivalence relation:
   \inferrule{t_1 \Aeq t_2}
             {\lambda x.t_1 \Aeq \lambda x.t_2}
 
-  \inferrule{y \not\in FV(t)}
+  \inferrule{y \not\in \FVars{t}}
             {\lambda x.t \Aeq \lambda y.\Subst{t}{y}{x}}
 
 \end{mathpar}
+\caption{The $\alpha$-equivalence relation.}
+\label{fig:syntax_alpha_equiv}
+\end{figure}
+
+The $\alpha$-equivalence relation is defined in
+\autoref{fig:syntax_alpha_equiv}.
+It has the three usual rules that make it an equivalence relation:
+reflexivity, symmetry and transitivity. Additionally, the relation
+is a congruence: it is compatible with the preterm constructors
+thanks to the three structural rules.\footnote{
+  The rule for variables is somewhat redundant, as it is just a special case
+  of reflexivity.
+} Finally, the last presented rule allows the variable bound by a
+$\lambda$-abstraction to be renamed, as long as it does not result in the
+capture of any of the free variable in its body.
+
+We can now define the set of terms as the quotient set
+\[ \Term = \Preterm / {\Aeq}, \]
+which is the set of all equivalence classes of $\Aeq$. It is customary to
+simply write $t$ in place of $[t]_{\Aeq}$, and only consider terms up to
+$\alpha$-equivalence. Substitution for terms can be defined as a total
+function, as capture can be avoided by the use of variable renaming.
+We can lift the substitution operation for preterms to terms by using it on the
+representatives of the $\alpha$-equivalence classes. Proving that this
+definition is well-behaved is left as an exercise.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Variable Binding via Indexed Families of Sets}
