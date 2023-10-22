@@ -10,7 +10,7 @@
   \varphi & \Coloneqq \top \mid \bot \mid \varphi \to \varphi
 \end{alignat*}
 
-$\Denot{\cdot} \colon Formula \to D$
+$\Denot{\cdot} \colon \syncatset{Formula} \to \mathcal{D}$
 \begin{alignat*}{2}
   \Denot{\top} & = \texttt{true} \\
   \Denot{\bot} & = \texttt{false} \\
@@ -20,17 +20,23 @@ $\Denot{\cdot} \colon Formula \to D$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotation of Types}
 
-$\textbf{Type} = \mathcal{P}(Value_{\emptyset})$ (sets of closed values)
+$\semcatset{Type} = \mathcal{P}(\syncatset{Value}_{\varnothing})$
+(sets of closed values)
 
-$\Denot{\cdot} \colon Type \to \textbf{Type}$ - denotation of a type - set of values of that type
+$\Denot{\cdot} \colon \syncatset{Type} \to \semcatset{Type}$ ---
+  denotation of a type --- set of values of that type
 \begin{alignat*}{2}
   \Denot{\texttt{Unit}} & = \{\texttt{()}\} \\
-  \Denot{\tau_1 \to \tau_2} & = \{ v \mid \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \}
+  \Denot{\tau_1 \to \tau_2} & = \{ v \mid
+    \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \}
 \end{alignat*}
 
-$\mathcal{E} \colon \textbf{Type} \to \mathcal{P}(Expr_{\emptyset})$
+$\mathcal{E} \colon \semcatset{Type} \to
+  \mathcal{P}(\syncatset{Expr}_{\varnothing})$
 
-$\mathcal{E}R = \{ e \mid \forall e'\ldotp e \to^* e' \Rightarrow (\exists v \in R \ldotp e'=v) \lor (\exists e'' \ldotp e'\to^*e'') \}$
+$\mathcal{E}R = \{ e \mid \forall e'\ldotp e \longrightarrow^* e'
+  \Rightarrow (\exists v \in R \ldotp e'=v) \lor
+    (\exists e'' \ldotp e'\longrightarrow^*e'') \}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Logical Relation}
@@ -40,94 +46,109 @@ $\mathcal{E}R = \{ e \mid \forall e'\ldotp e \to^* e' \Rightarrow (\exists v \in
 $\Denot{\Gamma} = \{\gamma \mid \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)}\}$
 ($\gamma \in \Denot{\Gamma} \Longleftrightarrow \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)} $)
 
-$\gamma \colon X \to Value_{\emptyset}$
+$\gamma \colon X \to \syncatset{Value}_{\varnothing}$
 
-$\Gamma \models e : \tau \Longleftrightarrow \forall \gamma \in \Denot{\Gamma}\ldotp \gamma^*(e) \in \mathcal{E}\Denot{\tau}$
+$\Gamma \models e \;:\; \tau \Longleftrightarrow
+  \forall \gamma \in \Denot{\Gamma}\ldotp
+  \gamma^*(e) \in \mathcal{E}\Denot{\tau}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Soundness}
 
-% Compatibility Lemmas, Fundamental Property, Adequacy, and Type Safety
-% go here.
 \begin{theorem}[Fundamental Property]
-  If $\Gamma \vdash e : \tau$ then $\Gamma \models e : \tau$
-\end{theorem}
-
-\begin{theorem}[Type safety]
-  If $\emptyset \vdash e : \tau$ then $Safe(e)$
-
-  $Safe(e) = \forall e'\ldotp e\to^*e' \Rightarrow (\exists v\ldotp e'=v) \lor (\exists e''\ldotp e'\to e'')$
+  If $\Gamma \vdash e \;:\; \tau$ then $\Gamma \models e \;:\; \tau$.
 \end{theorem}
 
 \begin{theorem}[Adequacy]
-  $\mathcal{E}R \subseteq Safe$
+  For any $e \in \mathcal{E}R$ we have $\Safe{e}$.
 \end{theorem}
 
+\begin{theorem}[Type safety]
+  If $\emptyset \vdash e : \tau$ then $\Safe{e}$.
+\end{theorem}
+
+\begin{lemma}\label{lem:lr-val-in-eclo}
+  For any semantic type $R$ and value $v \in R$
+  we have $v \in \mathcal{E}R$.
+\end{lemma}
+
+\begin{lemma}\label{lem:lr-eclo-red}
+  If $e \longrightarrow e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$.
+\end{lemma}
+
+In order to prove Fundamental Property
+we show series of \emph{compatibility lemmas}.
+Each of them corresponds to one typing rule.
+
 \begin{lemma}
-  $\forall R \in \textbf{Type}\ldotp \forall v \in R\ldotp v \in \mathcal{E}R$
+  $\Gamma \models () \;:\; \mathtt{Unit}$
 \end{lemma}
 
 \begin{lemma}
-  If $e \to e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$
+  If $(x:\tau) \in \Gamma$ then
+  $\Gamma \models x \;:\; \tau$.
 \end{lemma}
 
 \begin{lemma}
-  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
-  and $e_2 \in \mathcal{E}\Denot{\tau_2}$
-  then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$
+  If $\Gamma, x:\tau_1 \models e \;:\; \tau_2$
+  then $\Gamma \models \lambda x.e \;:\; \tau_1 \to \tau_2$.
 \end{lemma}
 \begin{proof}
-  Pick any $e'$ such that $e_1\;e_2 \to^* e'$.
-  We have three cases:
+  Take any $\gamma \in \Denot{\Gamma}$;
+    to show: $\gamma^{*}\lambda x.e
+      = \lambda x.\gamma^{\Uparrow_x*} e
+      \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$.\\
+  By \autoref{lem:lr-val-in-eclo} it suffices to show 
+    $\lambda x.\gamma^{\Uparrow_x*} e
+      \in \Denot{\tau_1 \to \tau_2}$.\\
+  Take any $v \in \Denot{\tau_1}$;
+    to show: $(\lambda x.\gamma^{\Uparrow_x*} e)\;v
+      \in \mathcal{E}\Denot{\tau_2}$. \\
+  By \autoref{lem:lr-eclo-red} it suffices to show
+    $(\gamma^{\Uparrow_x*} e)\{v/x\}
+    = (v \triangleleft_x \gamma)^* e \in \mathcal{E}\Denot{\tau_2}$. \\
+  By assumption, it suffices to show
+    $v \triangleleft_x \gamma \in \Denot{\Gamma, x : \tau_1}$,
+  which is easy to verify by case analysis on variable.
+\end{proof}
+
+For convenience, we prove compatibility lemma for application
+for closed terms first.
+
+\begin{lemma}\label{lem:lr-compat-app-cl}
+  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
+  and $e_2 \in \mathcal{E}\Denot{\tau_2}$
+  then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$.
+\end{lemma}
+\begin{proof}
+  Pick any $e'$ such that $e_1\;e_2 \longrightarrow^* e'$.
+  We have three, the following cases.
   \begin{enumerate}[label=(\roman*)]
-  \item $e_1 \to^* e_1'$ (not a value), then $e' = e_1'\;e_2$;
-  \item $e_1 \to^* v_1$, $e_2\to e_2'$ (not a value) $e' = v_1\;e_2'$;
-  \item $e_1 \to^* v_1$, $e_2 \to^* v_2$ and $v_1\;v_2 \to^* e'$.
+  \item $e_1 \longrightarrow^* e_1'$ (not a value) and $e' = e_1'\;e_2$.
+    By assumption we have $e_1' \longrightarrow e_1''$
+    and therefore, $e' \longrightarrow e_1''\;e_2$.
+  \item $e_1 \longrightarrow^* v_1$, $e_2\longrightarrow e_2'$
+    (not a value) and $e' = v_1\;e_2'$.
+    By assumption we have $e_2' \longrightarrow e_2''$
+    and therefore, $e' \longrightarrow v_1\;e_2''$.
+  \item $e_1 \longrightarrow^* v_1$, $e_2 \longrightarrow^* v_2$
+    and $v_1\;v_2 \longrightarrow^* e'$.
+    By assumption we have $v_1\in\Denot{\tau_2\to\tau_1}$
+    and $v_2\in\Denot{\tau_2}$,
+    so by the definition of $\Denot{\tau_2\to\tau_1}$
+    we have $v_1\;v_2 \in \mathcal{E}\Denot{\tau_1}$.
+    Since $v_1\;v_2 \longrightarrow^* e'$ we can conclude the proof.
     \qedhere
   \end{enumerate}
 \end{proof}
 
 \begin{lemma}
-  $\Gamma \models () : Unit$
-\end{lemma}
-
-\begin{lemma}
-  $\Gamma \models x : \Gamma(x)$
-\end{lemma}
-
-\begin{lemma}
-  If $\Gamma, x:\tau_1 \models e : \tau_2$
-  then $\Gamma \models \lambda x.e : \tau_1 \to \tau_2$
+  If $\Gamma \models e_1 \;:\; \tau_2 \to \tau_1 $
+  and $\Gamma \models e_2 \;:\; \tau_2$
+  then $\Gamma \models e_1\;e_2 \;:\; \tau_1$.
 \end{lemma}
 \begin{proof}
-  Take any $\gamma \in \Denot{\Gamma}$
-
-  T.S. $\lambda^{\Uparrow*} e \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$
-
-  From lemma 1:
-
-  T.S. $\lambda^{\Uparrow*} e \in \Denot{\tau_1 \to \tau_2}$
-
-  Take any $v \in \Denot{\tau_1}$
-
-  T.S. $(\lambda^{\Uparrow*} e)\;v \in \Denot{\tau_2}$
-
-  From lemma 2:
-
-  T.S. $(\gamma^{\Uparrow*} e)\{v/x\} \in \mathcal{E}\Denot{\tau_2}$
-
-  T.S. $(v \triangleleft \gamma)^* \in \mathcal{E}\Denot{\tau_2}$
-
-  From induction hypothesis:
-
-  T.S. $v \triangleleft \gamma \in \Denot{\Gamma, x : \tau_1}$
-\end{proof}
-
-\begin{lemma}
-  If $\Gamma \models e_1 : \tau_2 \to \tau_1 $ and $\Gamma \models e_2 : \tau_2$ then $\Gamma \models e_1\;e_2 : \tau_1$
-\end{lemma}
-\begin{proof}
-  Proof using lemma 3.
+  Directly from \autoref{lem:lr-compat-app-cl}.
 \end{proof}
 
 \medskip
@@ -137,11 +158,14 @@ Using Compatibility Lemmas proof of Fundamental Property is straightforward indu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Termination of Simply-Typed Lambda Calculus}
 
-If $\emptyset \vdash e : \tau$ then $\exists v\ldotp e \to^* v$
+\begin{theorem}{Termination}
+  If $\emptyset \vdash e \;:\; \tau$ then
+  there exists $v$ such that $e \longrightarrow^* v$.
+\end{theorem}
 
 To prove termination we will change definition of $\mathcal{E}$ to reflect that fact.
 
-$\mathcal{E}R = \{ e \mid \exists v \in R\ldotp e \to^* v \}$
+$\mathcal{E}R = \{ e \mid \exists v \in R\ldotp e \longrightarrow^* v \}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}

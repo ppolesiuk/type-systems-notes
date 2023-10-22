@@ -33,9 +33,9 @@ two concrete approaches to variables and variable binding.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Classic Approach to Variable Binding}
 
-\newcommand\Preterm{\mathrm{Preterm}}
-\newcommand\Term{\mathrm{Term}}
-\newcommand\Var{\mathrm{Var}}
+\newcommand\Preterm{\syncatset{Preterm}}
+\newcommand\Term{\syncatset{Term}}
+\newcommand\Var{\syncatset{Var}}
 \newcommand\FVars[1]{\mathrm{fv}(#1)}
 \newcommand\Subst[3]{#1\{#2/#3\}}
 \newcommand\Aeq{\equiv_\alpha}
@@ -140,7 +140,7 @@ definition is well-behaved is left as an exercise.
 \section{Variable Binding via Indexed Families of Sets}
 
 % Indexed family of sets of terms
-\newcommand\ITerm[1]{\mathrm{Term}_{#1}}
+\newcommand\ITerm[1]{\syncatset{Term}_{#1}}
 % Variable constructor
 \newcommand\ITVar[1]{\ulcorner #1 \urcorner}
 % Successor (constructor of X+1)$
