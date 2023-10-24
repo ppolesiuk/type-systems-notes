@@ -8,6 +8,11 @@
 \theoremstyle{definition}
 \newtheorem{defin}[theorem]{Definition}
 
+% Enumeration in theorems and definitions
+\newenvironment{thmenumerate}
+  {\begin{enumerate}[label=(\roman*),itemsep=0pt]}
+  {\end{enumerate}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Typesetting conventions for different objects
 

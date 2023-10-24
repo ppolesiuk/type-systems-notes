@@ -142,7 +142,7 @@ definition is well-behaved is left as an exercise.
 % Indexed family of sets of terms
 \newcommand\ITerm[1]{\syncatset{Term}_{#1}}
 % Variable constructor
-\newcommand\ITVar[1]{\ulcorner #1 \urcorner}
+\newcommand\ITVar[1]{\ulcorner\! #1 \!\urcorner}
 % Successor (constructor of X+1)$
 \newcommand\ITSucc{\mathsf{s}}
 % Extending set by one element
@@ -219,26 +219,58 @@ For example $\ITerm{\varnothing}$ contains all closed terms
 while $\ITerm{\Var}$ is a set (isomorphic to a set)
 of terms from the previous section.
 
-Formally $\ITerm{X}$ is smallest set, such that:
+We will define $\ITerm{X}$ inductively.
+Before going into details, let us see how we can represent a variable binding.
+Obviously, we can find some lambda-abstractions in $\ITerm{X}$.
+Because we are aiming for a nameless representation,
+these lambda-abstraction have the form $\lambda t$,
+where the variable bound by a lambda has no name.
+What is a set of potentially free variables of the body~$t$?
+It is a set~$X$ extended with this one extra variable bound by the lambda.
+We will write $\ITInc{X}$ for such a set,
+and $0$ for this new element.
+But $X$ may be an arbitrary set, in particular, it can already contain element~$0$.
+Therefore, in the set $\ITInc{X}$
+we wrap all elements of $X$ around the constructor $\ITSucc$
+in order to distinguish them from $0$.
+Formally, $\ITInc{X}$ has the following inductive definition.
 
-\begin{itemize}
-\item $\forall x \in X\ldotp \ITVar{x} \in \ITerm{X}$
-\item $\forall t \in \ITerm{X+1}\ldotp \lambda t \in \ITerm{X}$
-\item $\forall t_1, t_2 \in \ITerm{X}\ldotp t_1\;t_2 \in \ITerm{X}$
-\end{itemize}
+\begin{defin}
+  For any set $X$ we define $\ITInc{X}$ as the smallest set, such that:
+  \begin{thmenumerate}
+  \item $0 \in \ITInc{X}$,
+  \item for each $x\in X$ we have $\ITSucc\;x \in X$.
+  \end{thmenumerate}
+\end{defin}
 
-$\ITInc{X}$ is isomorphic to \texttt{Maybe} or \texttt{option}
-and is defined as:
+Note that $\ITInc{X}$ is isomorphic to \texttt{Maybe} or \texttt{option}
+known from functional programming.
+Now, we can formally define set of terms~$\ITerm{X}$.
 
-\begin{itemize}
-\item $0 \in \ITInc{X}$
-\item $\forall x \in X\ldotp \ITSucc\;x \in \ITInc{X}$
-\end{itemize}
+\begin{defin}
+  For any set $X$ we define $\ITerm{X}$ as the smallest set, such that:
+  \begin{thmenumerate}
+  \item for each $x \in X$ a term $\ITVar{x}$ that represents a variable
+    is a valid term ($\ITVar{x} \in \ITerm{X}$);
+  \item for each $t \in \ITerm{\ITInc{X}}$
+    a lambda-abstraction $\lambda t$ is a valid term ($\lambda t \in \ITerm{X}$);
+  \item for each $t_1,t_2 \in \ITerm{X}$ an application $t_1\;t_2$
+    is a valid term ($t_1\;t_2 \in \ITerm{X}$).
+  \end{thmenumerate}
+\end{defin}
 
-We should note that we changed $\lambda x.t$ to simply $\lambda t$.
-The role of $x$ now belongs to 0, which may be present in $t \in \ITerm{X+1}$.
-For example term $\lambda x.\lambda y. xy$
-would be written as $\lambda\lambda \ITSucc\;0\;0 = \lambda\lambda 1\;0$.
+Since a set of potentially free variables may be an arbitrary set,
+in particular, it can be also a set of terms (we may have $\ITerm{\ITerm{X}}$).
+In order to avoid some notational ambiguity, we explicitly wrap variables around
+a constructor $\ITVar{x}$.
+
+An interesting side note is a connection of presented term representation with
+de Bruijn indices.
+If we treat $\ITSucc\;n$ as a successor of $n$, and write $\ITSucc\;0$ as $1$,
+$\ITSucc(\ITSucc\;0)$ as $2$, \emph{etc.},
+then for closed terms we obtain exactly de Bruijn indices!
+For example term $\lambda x.\lambda y. x\;y$
+would be written as $\lambda\lambda \ITVar{1}\;\ITVar{0}$.
 
 With the removal of names for bound variables we don't run into the same problems as before.
 The only thing left to do is to define substitution
