@@ -3,8 +3,45 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{System F}
 
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq \tau \to \tau \mid \forall\alpha.\tau \mid \alpha \tag{types}\\
+  e & \Coloneqq v \mid e\;e \mid e\;* \tag{expressions} \\
+  v & \Coloneqq \lambda x.e \mid x \mid \Lambda e \tag{values}
+\end{alignat*}
+
+\begin{mathpar}
+  \inferrule{\Delta,\alpha;\Gamma\vdash e : \tau}
+            {\Delta;\Gamma\vdash \Lambda e : \forall\alpha.\tau}
+
+  \inferrule{\Delta;\Gamma\vdash e : \forall\alpha.\tau}
+            {\Delta;\Gamma\vdash e\;* : \tau\{\tau'/\alpha\}}
+\end{mathpar}
+
+Implicit alternative:
+
+\begin{mathpar}
+  \inferrule{\Delta,\alpha;\Gamma\vdash e : \tau}
+            {\Delta;\Gamma\vdash e : \forall\alpha.\tau}
+
+  \inferrule{\Delta;\Gamma\vdash e : \forall\alpha.\tau}
+            {\Delta;\Gamma\vdash e : \tau\{\tau'/\alpha\}}
+\end{mathpar}
+
+Value restriction:
+
+\begin{mathpar}
+  \inferrule{\Delta,\alpha;\Gamma\vdash v : \tau}
+            {\Delta;\Gamma\vdash v : \forall\alpha.\tau}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Logical Relations for Polymorphism}
+
+\begin{alignat*}{2}
+  \Denot{\forall\alpha.\tau}_{\eta} & = \{ v \mid \forall R \in \semcatset{Type}. v\;* \in \mathcal{E}\Denot{\tau_1}_{\eta[\alpha \mapsto R]} \} \\
+  \Denot{\alpha}_{\eta} & = \eta(\alpha)
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
