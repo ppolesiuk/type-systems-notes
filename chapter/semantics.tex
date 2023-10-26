@@ -4,17 +4,17 @@
 \section{Denotational Semantics}
 
 \[
-\llbracket \cdot \rrbracket \colon
+\Denot{\cdot} \colon
   \syncatset{Term} \times (\syncatset{Var} \rightarrow \mathcal{D})
     \rightarrow \mathcal{D}_{\bot}
 \]
 
 \begin{alignat*}{2}
-  \llbracket x \rrbracket_\rho & = \rho(x) \\
-  \llbracket \lambda x.t \rrbracket_\rho & =
-    \psi(\mathbf{\lambda} v. \llbracket t \rrbracket_{\rho [x \mapsto v]}) \\
-  \llbracket t_1 \; t_2 \rrbracket_\rho & =
-    \varphi(\llbracket t_1 \rrbracket_\rho) \llbracket t_2 \rrbracket_\rho
+  \Denot{x}_\rho & = \rho(x) \\
+  \Denot{\lambda x.t}_\rho & =
+    \psi(\mathbf{\lambda} v. \Denot{t}_{\rho [x \mapsto v]}) \\
+  \Denot{t_1 \; t_2}_\rho & =
+    \varphi(\Denot{t_1}_\rho) \Denot{t_2}_\rho
 \end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
