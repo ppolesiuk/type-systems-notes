@@ -43,13 +43,13 @@ Termination: $Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
 \end{lemma}
 
 \begin{lemma}
-  If $Gamma,x:\tau_1 |= e : \tau_2$ then $Gamma |= \lambda x.e : \tau_1 \to \tau_2$
+  If $\Gamma,x : \tau_1 \models e : \tau_2$ then $\Gamma\models \lambda x.e : \tau_1 \to \tau_2$
 \end{lemma}
 \begin{proof}(Sketch)\\
   Take any $\gamma \in \Denot{\Gamma}$;
     to show: $\gamma^*(\lambda x.e) \in \Denot{\tau_1 \to \tau_2}$\\
   Take any $v \in \Denot{\tau_1}$;
-    to show: $(\gamma^* (\lambda x.e))\;v \in E\Denot{\tau_2}$\\
+    to show: $(\gamma^* (\lambda x.e))\;v \in \mathcal{E}\Denot{\tau_2}$\\
   Take any $E \in \mathcal{K}\Denot{t_2}$;
     to show: $E[(\gamma^* (\lambda x.e))] \in Obs$\\
   $E[(v \triangleleft \gamma)^* e] \in Obs$
