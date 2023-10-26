@@ -28,6 +28,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Operational Semantics}
 
+We can classify evaluation rules to:
+\begin{itemize}
+    \item reduction rules, which do computations (e.g. application rule below)
+    \item structural congruence rules, which indicate when and which subterms can be evaluated;
+        they define evaluation order
+\end{itemize}
+
 \begin{mathpar}
   \inferrule{\phantom{e}}
             {(\lambda x.e)\;v \longrightarrow e\{v/x\}}
@@ -41,6 +48,10 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evaluation Contexts and Reduction Semantics}
+
+Evaluation context $E$ represents the rest of the computation during evaluation.
+Current position is called the hole $\square$. Evaluation context's grammar
+is more compact representation of structural congruence rules.
 
 \begin{mathpar}
   \inferrule{\phantom{e}}
@@ -73,6 +84,28 @@ inside-out:
   (v\;E)[e]  & = E[v e]
 \end{alignat*}
 
+When we associate evaluation contexts with stack frames, these two variants
+correspond to two different orderings. In the inside-out style, the root contains
+first operation that will be applied to the value produced by $\square$. \\
+
+Figures below show these contexts for $1 + (\square - 2)$.
+
+\begin{figure}[h]
+  \centering
+
+  \begin{subfigure}{0.30\textwidth}
+    \includegraphics[width=0.6\linewidth]{images/outside-in.jpg}
+    \caption{Outside-in context}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.30\textwidth}
+    \includegraphics[width=0.6\linewidth]{images/inside-out.jpg}
+    \caption{Inside-out context}
+  \end{subfigure}
+
+  \caption{Difference between two context styles}
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Programs, and Non-local Reductions: \texttt{call/cc}}
 
@@ -84,6 +117,8 @@ inside-out:
   v & \Coloneqq x \mid v
     \tag{values}
 \end{alignat*}
+
+Thanks to evaluation contexts, we can define non-local control flow constructs.
 
 \begin{alignat*}{2}
   E[\mathcal{K} x.e] & \longrightarrow E[e\{\lambda y.\mathcal{A} E[y] / x\}] \\
