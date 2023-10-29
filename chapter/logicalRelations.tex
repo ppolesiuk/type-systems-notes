@@ -3,39 +3,123 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntactic Provability and Semantic Truth}
 
-% Some intuitions from propositional logic go here
-
+Recall the formulae of propositional logic, as described by the following
+grammar. For simplicity, we omit variables and consider just the true
+and false constants and implication.
 \begin{alignat*}{2}
   \varphi & \Coloneqq \top \mid \bot \mid \varphi \to \varphi
 \end{alignat*}
-
+We say that a formula is \emph{provable} and write $\vdash \varphi$
+when we can derive its proof using natural deduction. Such a derivation
+is purely syntactic, and makes no appeal to the meaning of the formula.
+On the other hand, to talk about whether a formula is \emph{true},
+we must do so in reference to a semantics, such as the one given by the
+denotation
 $\Denot{\cdot} \colon \syncatset{Formula} \to \mathcal{D}$
+defined below\footnote{
+  As intuitionists, we can think of $\mathcal{D}$ as a Heyting algebra,
+  with $\mathsf{T}$ and $\mathsf{F}$ as its top and bottom elements, and
+  $\Rightarrow$ as its implication operator.
+}.
 \begin{alignat*}{2}
-  \Denot{\top} & = \texttt{true} \\
-  \Denot{\bot} & = \texttt{false} \\
+  \Denot{\top} & = \mathsf{T} \\
+  \Denot{\bot} & = \mathsf{F} \\
   \Denot{\varphi \to \psi} & = \Denot{\varphi} \Rightarrow \Denot{\psi}
 \end{alignat*}
+If $\varphi$ is true in accordance to the semantics
+(\emph{i.e.}, its denotation is $\mathsf{T}$),
+we write $\models \varphi$. How do
+provability and truth relate to each other? For one, provability should be
+\emph{sound} with respect to the semantic truth, \emph{i.e.}, all provable
+formulae are true (${\vdash} \subseteq {\models}$).
+In the example we are considering at present, we also have the
+converse property, known as \emph{completeness}: true formulae are provable.
+Completeness is not always feasible in general, but an incomplete
+yet sound system of deduction can still be useful in practice.
+
+Returning to our study of programming languages, we have seen that there is a
+correspondence between the typing relation $\Gamma \vdash e : \tau$ and natural
+deduction.
+Accordingly, we can define a semantic relation $\Gamma \models e : \tau$, in
+analogy to $\models \varphi$, such that soundness holds.
+Such a relation is usually called a \emph{logical relation}. In the rest of
+this chapter, we will define a logical relation for the simply-typed lambda
+calculus, give a proof of soundness, and show that the logical relation can be
+used to establish various interesting properties, such as type safety (again)
+and the termination of well-typed programs.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotation of Types}
 
-$\semcatset{Type} = \mathcal{P}(\syncatset{Value}_{\varnothing})$
-(sets of closed values)
+As with the formulae of propositional logic, we need to assign some sort of
+semantic interpretation to the syntactic types of the lambda calculus. What is
+an appropriate semantic domain for the denotation of types? When we try to
+think of what a type represents, for example as we are writing a program, we
+tend to think of the set of (closed) values that inhabit that type. Therefore,
+we define the space of \emph{semantic types} as
+\[
+  \semcatset{Type} = \mathcal{P}(\syncatset{Value}_{\varnothing}),
+\]
+where $\syncatset{Value}_{\varnothing}$ is the set of all closed values.
 
-$\Denot{\cdot} \colon \syncatset{Type} \to \semcatset{Type}$ ---
-  denotation of a type --- set of values of that type
+We will now define the denotation
+$\Denot{\cdot} \colon \syncatset{Type} \to \semcatset{Type}$.
+We know that $\texttt{()}$ is the only value of type $\texttt{Unit}$,
+so we can take the singleton $\{\texttt{()}\}$ as the semantic
+interpretation of this type.
+Arrow types are a bit more complicated. They represent functions, and the
+essence of a function is that it can be applied to an argument. We will exploit
+this intuition in the denotation of arrows by saying that a value behaves like
+an arrow if, when applied to a semantically well-typed value, the result is
+also semantically well-typed. However, there is one problem: an application is
+not a value, so it cannot be in the denotation of the result type.
+We somehow need to expand the denotation to all expressions.
+For this purpose, we define the expression closure operator
+$\mathcal{E} \colon \semcatset{Type} \to
+  \mathcal{P}(\syncatset{Expr}_{\varnothing})$.
+
+Expressions which are not values can be reduced.
+Thus, given a semantic type $R$, the closure $\mathcal{E} R$
+should at the very least contain all the expression that reduce
+to a value in $R$. What of expressions that do not terminate? Since
+type safety permitted non-termination, we might want to do the same in
+$\mathcal{E}$.
+
+\begin{figure}[t!!]
 \begin{alignat*}{2}
   \Denot{\texttt{Unit}} & = \{\texttt{()}\} \\
   \Denot{\tau_1 \to \tau_2} & = \{ v \mid
-    \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \}
-\end{alignat*}
-
-$\mathcal{E} \colon \semcatset{Type} \to
-  \mathcal{P}(\syncatset{Expr}_{\varnothing})$
-
-$\mathcal{E}R = \{ e \mid \forall e'\ldotp e \longrightarrow^* e'
+    \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \} \\\\
+  \mathcal{E}R & = \{ e \mid \forall e'\ldotp e \longrightarrow^* e'
   \Rightarrow (\exists v \in R \ldotp e'=v) \lor
-    (\exists e'' \ldotp e'\longrightarrow^*e'') \}$
+    (\exists e'' \ldotp e'\longrightarrow^*e'') \}
+\end{alignat*}
+\caption{The denotation of types and the expression closure operator.}
+\label{fig:logicalRelations_denots}
+\end{figure}
+
+As an aside, there is a certain asymmetry in the denotations for
+$\texttt{Unit}$ and $\tau_1\to\tau_2$. The former corresponds to the
+introduction rule for type $\texttt{Unit}$ and uses the unit value constructor
+$\texttt{()}$, while the latter corresponds to the elimination rule for
+arrows and uses application.
+In our case, we could equivalently define the denotation of an arrow as
+\[
+  \Denot{\tau_1 \to \tau_2} = \{ \lambda x\ldotp e \mid
+  \forall v \in \Denot{\tau_1}\ldotp
+    \Subst{e}{v}{x} \in \mathcal{E}\Denot{\tau_2} \}.
+\]
+This version is similar to the introduction rule for the arrow type, and
+requires values of the shape $\lambda x\ldotp e$. The problem with this
+formulation is that it is less abstract, and therefore, fails to account for
+extensions to the calculus, such as recursive functions. Similarly, we could
+try to define a denotation for $\texttt{Unit}$ in the elimination style.
+In a sense, this is a degenerate case, as there are no elimination rules for
+$\texttt{Unit}$. Therefore, we could place no additional conditions on the
+values in the denotation and set
+$\Denot{\texttt{Unit}} = \syncatset{Value}_{\varnothing}$. Although
+unintuitive, this definition would not compromise any of the theorems
+that we will see in this chapter.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Logical Relation}
