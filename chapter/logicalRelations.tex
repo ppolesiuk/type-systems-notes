@@ -179,19 +179,19 @@ Each of them corresponds to one typing rule.
 \begin{proof}
   Take any $\gamma \in \Denot{\Gamma}$;
     to show: $\gamma^{*}\lambda x.e
-      = \lambda x.\gamma^{\Uparrow_x*} e
+      = \lambda x.\gamma^{*} e
       \in \mathcal{E}\Denot{\tau_1 \to \tau_2}$.\\
   By \autoref{lem:lr-val-in-eclo} it suffices to show 
-    $\lambda x.\gamma^{\Uparrow_x*} e
+    $\lambda x.\gamma^{*} e
       \in \Denot{\tau_1 \to \tau_2}$.\\
   Take any $v \in \Denot{\tau_1}$;
-    to show: $(\lambda x.\gamma^{\Uparrow_x*} e)\;v
+    to show: $(\lambda x.\gamma^{*} e)\;v
       \in \mathcal{E}\Denot{\tau_2}$. \\
   By \autoref{lem:lr-eclo-red} it suffices to show
-    $(\gamma^{\Uparrow_x*} e)\{v/x\}
-    = (v \triangleleft_x \gamma)^* e \in \mathcal{E}\Denot{\tau_2}$. \\
+    $(\gamma^{*} e)\{v/x\}
+    = \gamma[x\mapsto v]^* e \in \mathcal{E}\Denot{\tau_2}$. \\
   By assumption, it suffices to show
-    $v \triangleleft_x \gamma \in \Denot{\Gamma, x : \tau_1}$,
+    $\gamma[x\mapsto v] \in \Denot{\Gamma, x : \tau_1}$,
   which is easy to verify by case analysis on variable.
 \end{proof}
 

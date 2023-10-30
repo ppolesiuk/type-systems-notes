@@ -12,6 +12,15 @@ Inductive inc (V : Set) : Set :=
 Arguments VZ {V}.
 Arguments VS {V}.
 
+(** Extending function to inc domain (γ[↦v] operation) *)
+Definition inc_ext {A : Set} {B : Type} (f : A → B) (v : B) (x : inc A) : B :=
+  match x with
+  | VZ   => v
+  | VS y => f y
+  end.
+
+Notation "f '[↦' v ']'" := (@inc_ext _ _ f v) (at level 50).
+
 (** Types *)
 Inductive type : Set :=
 | t_unit  : type
@@ -93,21 +102,13 @@ with vbind {A B : Set} (f : A → value B) (v : value A) : value B :=
   | v_unit  => v_unit
   end.
 
-(** Extending substitution (◃ operation) *)
-Definition scons {A B : Set} (v : value B) (f : A → value B) (x : inc A) :
-    value B :=
-  match x with
-  | VZ   => v
-  | VS y => f y
-  end.
-
 (** Substitution of single value in expression *)
 Definition esubst {A : Set} (e : expr (inc A)) (v : value A) : expr A :=
-  ebind (scons v v_var) e.
+  ebind (v_var [↦ v ]) e.
 
 (** Substitution of single value in value *)
 Definition vsubst {A : Set} (v' : value (inc A)) (v : value A) : value A :=
-  vbind (scons v v_var) v'.
+  vbind (v_var [↦ v ]) v'.
 
 (* ========================================================================= *)
 (* Properties of variable renamings *)
@@ -319,7 +320,7 @@ Proof.
 Qed.
 
 Lemma esubst_bind_lift {A B : Set} (f : A → value B) e v :
-  esubst (ebind (liftS f) e) v = ebind (scons v f) e.
+  esubst (ebind (liftS f) e) v = ebind (f [↦ v ]) e.
 Proof.
   apply ebind_bind_comp.
   intros [ | x ]; simpl; [ reflexivity | ].
@@ -327,7 +328,7 @@ Proof.
 Qed.
 
 Lemma vsubst_bind_lift {A B : Set} (f : A → value B) v' v :
-  vsubst (vbind (liftS f) v') v = vbind (scons v f) v'.
+  vsubst (vbind (liftS f) v') v = vbind (f [↦ v ]) v'.
 Proof.
   apply vbind_bind_comp.
   intros [ | x ]; simpl; [ reflexivity | ].

@@ -47,12 +47,12 @@ Termination: $Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
 \end{lemma}
 \begin{proof}(Sketch)\\
   Take any $\gamma \in \Denot{\Gamma}$;
-    to show: $\gamma^*(\lambda x.e) \in \Denot{\tau_1 \to \tau_2}$\\
+    to show: $\gamma^*\lambda x.e = \lambda x.\gamma^* e \in \Denot{\tau_1 \to \tau_2}$\\
   Take any $v \in \Denot{\tau_1}$;
-    to show: $(\gamma^* (\lambda x.e))\;v \in \mathcal{E}\Denot{\tau_2}$\\
+    to show: $(\lambda x.\gamma^* e)\;v \in \mathcal{E}\Denot{\tau_2}$\\
   Take any $E \in \mathcal{K}\Denot{t_2}$;
-    to show: $E[(\gamma^* (\lambda x.e))] \in Obs$\\
-  $E[(v \triangleleft \gamma)^* e] \in Obs$
+    to show: $E[(\lambda x.\gamma^* e)\;v] \in Obs$\\
+  $E[\gamma[x\mapsto v]^* e] \in Obs$
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

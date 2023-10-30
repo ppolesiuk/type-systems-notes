@@ -53,7 +53,7 @@ Fixpoint relT {Δ : Set} (τ : type Δ) (η : Δ → SemType) : SemType :=
   match τ with
   | t_var   α     => η α
   | t_arrow τ₁ τ₂ => Rel_Arrow (⟦ τ₁ ⟧ η) (⟦ τ₂ ⟧ η)
-  | t_forall τ    => Rel_Forall (λ R, ⟦ τ ⟧ (scons R η))
+  | t_forall τ    => Rel_Forall (λ R, ⟦ τ ⟧ (η [↦ R ]))
   end
 where "⟦ τ ⟧" := (@relT _ τ).
 
@@ -107,7 +107,7 @@ Admitted.
 
 (** Weakening lemma *)
 Lemma relT_weaken {Δ : Set} (η : Δ → SemType) τ R v :
-  ⟦ τ ⟧ η v ↔ ⟦ tshift τ ⟧ (scons R η) v.
+  ⟦ τ ⟧ η v ↔ ⟦ tshift τ ⟧ (η [↦ R ]) v.
 Proof.
   apply relT_map; reflexivity.
 Qed.
@@ -123,7 +123,7 @@ Admitted.
 
 (** Substitution lemma *)
 Lemma relT_subst {Δ : Set} (η : Δ → SemType) τ τ' v :
-  ⟦ τ ⟧ (scons (⟦ τ' ⟧ η) η) v ↔ ⟦ tsubst τ τ' ⟧ η v.
+  ⟦ τ ⟧ (η [↦ ⟦ τ' ⟧ η ]) v ↔ ⟦ tsubst τ τ' ⟧ η v.
 Proof.
   apply relT_bind; intros []; reflexivity.
 Qed.
@@ -132,13 +132,13 @@ Qed.
 (* Changing the typing environment *)
 
 Lemma rel_g_env_ext {Δ A : Set} (Γ : env Δ A) (τ : type Δ) η γ v :
-  G⟦ Γ ⟧ η γ → ⟦ τ ⟧ η v → G⟦ env_ext Γ τ ⟧ η (scons v γ).
+  G⟦ Γ ⟧ η γ → ⟦ τ ⟧ η v → G⟦ Γ [↦ τ ] ⟧ η (γ [↦ v ]).
 Proof.
   intros Hγ Hτ [ | x ]; simpl; [ assumption | apply Hγ ].
 Qed.
 
 Lemma rel_g_env_shift {Δ A : Set} (Γ : env Δ A) η γ R :
-  G⟦ Γ ⟧ η γ → G⟦ env_shift Γ ⟧ (scons R η) γ.
+  G⟦ Γ ⟧ η γ → G⟦ env_shift Γ ⟧ (η [↦ R ]) γ.
 Proof.
   intros Hγ x; simpl.
   apply relT_weaken, Hγ.
@@ -155,7 +155,7 @@ Proof.
 Qed.
 
 Lemma compat_lam {Δ A : Set} (Γ : env Δ A) e τ₁ τ₂ :
-  T⟦ env_ext Γ τ₁ ⊨ e ∷ τ₂ ⟧ →
+  T⟦ Γ [↦ τ₁ ] ⊨ e ∷ τ₂ ⟧ →
   T⟦ Γ ⊨ v_lam e ∷ t_arrow τ₁ τ₂ ⟧.
 Proof.
   intros He η γ Hγ; simpl.

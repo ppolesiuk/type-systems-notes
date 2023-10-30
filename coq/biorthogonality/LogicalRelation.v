@@ -85,7 +85,7 @@ Definition rel_e {A : Set} (Γ : env A) (e : expr A) (τ : type) : Prop :=
 Notation "'T⟦' Γ '⊨' e '∷' τ '⟧'" := (@rel_e _ Γ e τ).
 
 Lemma rel_g_env_ext {A : Set} (Γ : env A) (τ : type) γ v :
-  G⟦ Γ ⟧ γ → ⟦ τ ⟧ v → G⟦ env_ext Γ τ ⟧ (scons v γ).
+  G⟦ Γ ⟧ γ → ⟦ τ ⟧ v → G⟦ Γ [↦ τ ] ⟧ (γ [↦ v ]).
 Proof.
   intros Hγ Hτ [ | x ]; simpl; [ assumption | apply Hγ ].
 Qed.
@@ -108,7 +108,7 @@ Proof.
 Qed.
 
 Lemma compat_lam {A : Set} (Γ : env A) e τ₁ τ₂ :
-  T⟦ env_ext Γ τ₁ ⊨ e ∷ τ₂ ⟧ →
+  T⟦ Γ [↦ τ₁ ] ⊨ e ∷ τ₂ ⟧ →
   T⟦ Γ ⊨ v_lam e ∷ t_arrow τ₁ τ₂ ⟧.
 Proof.
   intros He γ Hγ; simpl.
@@ -146,7 +146,7 @@ Proof.
 Qed.
 
 Lemma compat_callcc {A : Set} (Γ : env A) e τ :
-  T⟦ env_ext Γ (t_arrow τ t_bot) ⊨ e ∷ τ ⟧ →
+  T⟦ Γ [↦ t_arrow τ t_bot ] ⊨ e ∷ τ ⟧ →
   T⟦ Γ ⊨ e_callcc e ∷ τ ⟧.
 Proof.
   (* Left as homework. Lemmas esubst_bind_lift, pbind_plug, xbind_scons_shift,

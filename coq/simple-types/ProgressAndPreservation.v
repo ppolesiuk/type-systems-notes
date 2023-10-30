@@ -7,7 +7,7 @@ Require Import Syntax SemanticsSOS Typing.
 (** Inversion lemma about closed values of an arrow type *)
 Lemma arrow_value_inv {Γ : env Empty_set} {v : value _} {τ₁ τ₂ : type} :
   T[ Γ ⊢ v ∷ t_arrow τ₁ τ₂ ] →
-  ∃ e, v = v_lam e ∧ T[ env_ext Γ τ₁ ⊢ e ∷ τ₂ ].
+  ∃ e, v = v_lam e ∧ T[ Γ [↦ τ₁ ] ⊢ e ∷ τ₂ ].
 Proof.
   inversion 1.
   + (* impossible case *)

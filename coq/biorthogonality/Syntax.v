@@ -12,6 +12,15 @@ Inductive inc (V : Set) : Set :=
 Arguments VZ {V}.
 Arguments VS {V}.
 
+(** Extending function to inc domain (γ[↦v] operation) *)
+Definition inc_ext {A : Set} {B : Type} (f : A → B) (v : B) (x : inc A) : B :=
+  match x with
+  | VZ   => v
+  | VS y => f y
+  end.
+
+Notation "f '[↦' v ']'" := (@inc_ext _ _ f v) (at level 50).
+
 (** Types *)
 Inductive type : Set :=
 | t_unit  : type
@@ -156,21 +165,13 @@ Fixpoint xbind {A B : Set} (f : A → value B) (E : ectx A) : ectx B :=
   | ectx_app2 v E => ectx_app2 (vbind f v) (xbind f E)
   end.
 
-(** Extending substitution (◃ operation) *)
-Definition scons {A B : Set} (v : value B) (f : A → value B) (x : inc A) :
-    value B :=
-  match x with
-  | VZ   => v
-  | VS y => f y
-  end.
-
 (** Substitution of single value in expression *)
 Definition esubst {A : Set} (e : expr (inc A)) (v : value A) : expr A :=
-  ebind (scons v v_var) e.
+  ebind (v_var [↦ v ]) e.
 
 (** Substitution of single value in value *)
 Definition vsubst {A : Set} (v' : value (inc A)) (v : value A) : value A :=
-  vbind (scons v v_var) v'.
+  vbind (v_var [↦ v ]) v'.
 
 (* ========================================================================= *)
 (* Properties of variable renamings *)
@@ -446,7 +447,7 @@ Proof.
 Qed.
 
 Lemma ebind_scons_shift {A B : Set} v (f : A → value B) e :
-  ebind (scons v f) (eshift e) = ebind f e.
+  ebind (f [↦ v ]) (eshift e) = ebind f e.
 Proof.
   unfold eshift.
   erewrite ebind_map_comp; [ apply emap_id' | ].
@@ -454,7 +455,7 @@ Proof.
 Qed.
 
 Lemma vbind_scons_shift {A B : Set} v' (f : A → value B) v :
-  vbind (scons v' f) (vshift v) = vbind f v.
+  vbind (f [↦ v' ]) (vshift v) = vbind f v.
 Proof.
   unfold vshift.
   erewrite vbind_map_comp; [ apply vmap_id' | ].
@@ -462,7 +463,7 @@ Proof.
 Qed.
 
 Lemma xbind_scons_shift {A B : Set} v (f : A → value B) E :
-  xbind (scons v f) (xshift E) = xbind f E.
+  xbind (f [↦ v ]) (xshift E) = xbind f E.
 Proof.
   unfold xshift.
   erewrite xbind_map_comp; [ apply xmap_id' | ].
@@ -485,7 +486,7 @@ Proof.
 Qed.
 
 Lemma esubst_bind_lift {A B : Set} (f : A → value B) e v :
-  esubst (ebind (liftS f) e) v = ebind (scons v f) e.
+  esubst (ebind (liftS f) e) v = ebind (f [↦ v ]) e.
 Proof.
   apply ebind_bind_comp.
   intros [ | x ]; simpl; [ reflexivity | ].
@@ -493,7 +494,7 @@ Proof.
 Qed.
 
 Lemma vsubst_bind_lift {A B : Set} (f : A → value B) v' v :
-  vsubst (vbind (liftS f) v') v = vbind (scons v f) v'.
+  vsubst (vbind (liftS f) v') v = vbind (f [↦ v ]) v'.
 Proof.
   apply vbind_bind_comp.
   intros [ | x ]; simpl; [ reflexivity | ].

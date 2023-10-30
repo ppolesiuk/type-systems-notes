@@ -18,14 +18,6 @@ Definition env (A : Set) : Set := A → type.
 Definition env_empty : env Empty_set :=
   λ x, match x with end.
 
-(** Extending the environment *)
-Definition env_ext {A : Set} (Γ : env A) (τ : type) : env (inc A) :=
-  λ x,
-  match x with
-  | VZ   => τ
-  | VS y => Γ y
-  end.
-
 (* We introduce some human-readable notation for typing *)
 Reserved Notation "'T[' Γ '⊢' e '∷' τ ']'".
 
@@ -41,7 +33,7 @@ Inductive typing {A : Set} (Γ : env A) : expr A → type → Prop :=
     T[ Γ ⊢ v_var x ∷ Γ x ]
 
 | T_Lam : ∀ e τ₁ τ₂,
-    T[ env_ext Γ τ₁ ⊢ e ∷ τ₂ ] →
+    T[ Γ [↦ τ₁ ] ⊢ e ∷ τ₂ ] →
     (*----------------------------*)
     T[ Γ ⊢ v_lam e ∷ t_arrow τ₁ τ₂ ]
 
@@ -80,7 +72,7 @@ Qed.
 
 (** Weakening lemma *)
 Lemma typing_weaken {A : Set} (Γ : env A) e τ' τ :
-  T[ Γ ⊢ e ∷ τ ] → T[ env_ext Γ τ' ⊢ eshift e ∷ τ ].
+  T[ Γ ⊢ e ∷ τ ] → T[ Γ [↦ τ' ] ⊢ eshift e ∷ τ ].
 Proof.
   apply typing_fmap; reflexivity.
 Qed.
@@ -109,7 +101,7 @@ Qed.
 (** Substitution lemma *)
 Lemma typing_subst {A : Set} (Γ : env A) e (v : value _) τ τ' :
   T[ Γ ⊢ v ∷ τ' ] →
-  T[ env_ext Γ τ' ⊢ e ∷ τ ] →
+  T[ Γ [↦ τ' ] ⊢ e ∷ τ ] →
   T[ Γ ⊢ esubst e v ∷ τ ].
 Proof.
   intro Hv; apply typing_bind.

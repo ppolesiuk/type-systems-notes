@@ -18,14 +18,6 @@ Definition env (Δ A : Set) : Set := A → type Δ.
 Definition env_empty : env Empty_set Empty_set :=
   λ x, match x with end.
 
-(** Extending the environment *)
-Definition env_ext {Δ A : Set} (Γ : env Δ A) (τ : type Δ) : env Δ (inc A) :=
-  λ x,
-  match x with
-  | VZ   => τ
-  | VS y => Γ y
-  end.
-
 (** Shifting the environment, i.e., extending by a fresh type variable. *)
 Definition env_shift {Δ A : Set} (Γ : env Δ A) : env (inc Δ) A :=
   λ x, tshift (Γ x).
@@ -44,7 +36,7 @@ Inductive typing {Δ A : Set} (Γ : env Δ A) : expr A → type Δ → Prop :=
     T[ Γ ⊢ v_var x ∷ Γ x ]
 
 | T_Lam : ∀ e τ₁ τ₂,
-    T[ env_ext Γ τ₁ ⊢ e ∷ τ₂ ] →
+    T[ Γ [↦ τ₁ ] ⊢ e ∷ τ₂ ] →
     (*----------------------------*)
     T[ Γ ⊢ v_lam e ∷ t_arrow τ₁ τ₂ ]
 

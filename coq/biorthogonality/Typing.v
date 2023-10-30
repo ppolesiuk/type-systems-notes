@@ -17,14 +17,6 @@ Definition env (A : Set) : Set := A → type.
 Definition env_empty : env Empty_set :=
   λ x, match x with end.
 
-(** Extending the environment *)
-Definition env_ext {A : Set} (Γ : env A) (τ : type) : env (inc A) :=
-  λ x,
-  match x with
-  | VZ   => τ
-  | VS y => Γ y
-  end.
-
 (* We introduce some human-readable notation for typing *)
 Reserved Notation "'T[' Γ '⊢' e '∷' τ ']'".
 
@@ -51,7 +43,7 @@ Inductive typing {A : Set} (Γ : env A) : expr A → type → Prop :=
     T[ Γ ⊢ v_var x ∷ Γ x ]
 
 | T_Lam : ∀ e τ₁ τ₂,
-    T[ env_ext Γ τ₁ ⊢ e ∷ τ₂ ] →
+    T[ Γ [↦ τ₁ ] ⊢ e ∷ τ₂ ] →
     (*----------------------------*)
     T[ Γ ⊢ v_lam e ∷ t_arrow τ₁ τ₂ ]
 
@@ -62,7 +54,7 @@ Inductive typing {A : Set} (Γ : env A) : expr A → type → Prop :=
     T[ Γ ⊢ e_app e₁ e₂ ∷ τ₁ ]
 
 | T_CallCC : ∀ e τ,
-    T[ env_ext Γ (t_arrow τ t_bot) ⊢ e ∷ τ ] →
+    T[ Γ [↦ t_arrow τ t_bot ] ⊢ e ∷ τ ] →
     (*---------------------------------------*)
     T[ Γ ⊢ e_callcc e ∷ τ ]
 
