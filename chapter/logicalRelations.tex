@@ -62,8 +62,21 @@ we define the space of \emph{semantic types} as
 \]
 where $\syncatset{Value}_{\varnothing}$ is the set of all closed values.
 
-We will now define the denotation
-$\Denot{\cdot} \colon \syncatset{Type} \to \semcatset{Type}$.
+\begin{figure}[t!!]
+\begin{alignat*}{2}
+  \Denot{\texttt{Unit}} & = \{\texttt{()}\} \\
+  \Denot{\tau_1 \to \tau_2} & = \{ v \mid
+    \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \} \\\\
+  \mathcal{E}R & = \{ e \mid \forall e'\ldotp e \longrightarrow^* e'
+  \Rightarrow (\exists v \in R \ldotp e'=v) \lor
+    (\exists e'' \ldotp e'\longrightarrow e'') \}
+\end{alignat*}
+\caption{The denotation of types and the expression closure operator.}
+\label{fig:logicalRelations_denots}
+\end{figure}
+
+We define the denotation $\Denot{\cdot} \colon \syncatset{Type} \to
+\semcatset{Type}$ in \autoref{fig:logicalRelations_denots}.
 We know that $\texttt{()}$ is the only value of type $\texttt{Unit}$,
 so we can take the singleton $\{\texttt{()}\}$ as the semantic
 interpretation of this type.
@@ -84,19 +97,15 @@ should at the very least contain all the expression that reduce
 to a value in $R$. What of expressions that do not terminate? Since
 type safety permitted non-termination, we might want to do the same in
 $\mathcal{E}$.
-
-\begin{figure}[t!!]
-\begin{alignat*}{2}
-  \Denot{\texttt{Unit}} & = \{\texttt{()}\} \\
-  \Denot{\tau_1 \to \tau_2} & = \{ v \mid
-    \forall v' \in \Denot{\tau_1}\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2} \} \\\\
-  \mathcal{E}R & = \{ e \mid \forall e'\ldotp e \longrightarrow^* e'
-  \Rightarrow (\exists v \in R \ldotp e'=v) \lor
-    (\exists e'' \ldotp e'\longrightarrow^*e'') \}
-\end{alignat*}
-\caption{The denotation of types and the expression closure operator.}
-\label{fig:logicalRelations_denots}
-\end{figure}
+Compared to the definition of safety, given as
+\[
+  \Safe{e} \iff
+  \forall e'\ldotp e \longrightarrow^* e'
+    \Rightarrow (\exists v \in \syncatset{Value}\ldotp e'=v) \lor
+      (\exists e'' \ldotp e'\longrightarrow e''),
+\]
+$\mathcal{E} R$ is nearly identical, but additionally requires that if the
+expression reduces to a value, then this value is in $R$.
 
 As an aside, there is a certain asymmetry in the denotations for
 $\texttt{Unit}$ and $\tau_1\to\tau_2$. The former corresponds to the
