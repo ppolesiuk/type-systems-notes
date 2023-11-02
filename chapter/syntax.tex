@@ -32,6 +32,7 @@ two concrete approaches to variables and variable binding.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Classic Approach to Variable Binding}
+\label{sec:syntax_classic}
 
 \newcommand\Preterm{\syncatset{Preterm}}
 \newcommand\Term{\syncatset{Term}}
@@ -58,7 +59,7 @@ such terms.
 \begin{figure}[t!!]
 \[
   \Subst{\cdot}{\cdot}{\cdot} \colon
-  \Preterm \times \Var \times \Preterm \rightharpoonup \Preterm
+  \Preterm \times \Var \times \Preterm \partialmap \Preterm
 \]
 \begin{eqnarray*}
   \Subst{x}{t}{x}          & = & t \\
@@ -408,7 +409,78 @@ which together with simultaneous substitution form a monad.
 \end{lemma}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Unified Syntax-Related Notations}
+\section{Informal Presentation vs Formalization}
+
+Syntax with variable binding is ubiquitous in the theory of programming
+languages.
+In this chapter we provided a very precise treatment of such syntax
+in order to give solid foundations for the rest of the notes,
+as well as to outline how such a theory can be formalized
+using proof assistants.
+In the remainder of these notes we stay
+on the informal level regarding variable binding.
+However, we believe that formalizing mathematics in proof assistants
+is important, especially in the theory of programming languages.
+Therefore, we try to present a technical material of these notes
+in a way that is not too far from possible formalization,
+even if formalizing mathematics is outside of the scope of these notes.
+
+There are two main differences between the informal presentation
+and the proposed approach to formalization.
+Firstly, the formalization uses nameless representation of variable
+binding, while in the informal mathematics, as well as in computer programs
+we prefer to use names to connect a variable with its binder.
+We see this as a rather minor issue,
+that is a reminiscent of the difference between concrete
+and abstract syntax of programming languages.
+The reader interested in formalizing theory should employ additional
+``parsing phase'' to presented definitions and theorems.
+
+The second difference concerns the properties that are built into
+term representation.
+The nameless representation of this chapter is well-scoped by design:
+the set of of terms is parametrized by a set of potentially free variables,
+or in other words: a \emph{scope}.
+On the other hand,
+traditional informal presentation permits terms with arbitrary
+free variables,
+while being closed or well-scoped is proven \emph{post-hoc}
+or externally assumed.
+In these notes we stick to traditional approach,
+but having the well-scoped formalization in mind.
+Unless explicitly stated otherwise,
+terms in presented definitions and theorems have some implicit scope
+that can be inferred from the context.
+The properties that free variables of such terms are in this implicit scope
+can be proven, but we usually don't even state such properties
+as not to bore the reader.
+
+In order to further narrow the gap between informal presentation
+and formalization,
+we borrow some notations from indexed families of sets and use them
+in the classical approach.
+We summarize our unified notations as follows.
+\begin{itemize}
+\item We write $\Term_\varnothing$ for set of closed terms
+  (in a sense of \autoref{sec:syntax_classic}).
+  We use the same convention for other syntactic categories,
+  \emph{e.g.}, $\syncatset{Expr}_\varnothing$, $\syncatset{Type}_\varnothing$.
+\item Given partial function $g\colon\Var \partialmap \Term$
+  we define a simultaneous capture-avoiding
+  substitution $g^*\colon \Term \to \Term$,
+  that for each free variable~$x$ substitutes $g(x)$
+  or leaves $x$ intact if $g(x)$ is undefined.
+  Note that if we assume Barendregt's variable convention,
+  we don't have to define a traditional counterpart of
+  lifting operation ($g^\Uparrow$), as it is almost identity operation.
+  When we proceed with substitution~$g$ under the binder of $x$,
+  then $g^*$ will map $x$ to itself.
+\item For possibly partial function~$f$ that maps variables to some
+  elements, we write $f[x\mapsto v]$ for a function that maps $x$ to $v$
+  and agrees with $f$ for other variables.
+  This is rather standard notation, but note that it coincides
+  with nameless operation $f[\mapsto v]$ defined in the previous section.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
