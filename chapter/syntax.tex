@@ -272,45 +272,140 @@ then for closed terms we obtain exactly de Bruijn indices!
 For example term $\lambda x.\lambda y. x\;y$
 would be written as $\lambda\lambda \ITVar{1}\;\ITVar{0}$.
 
-With the removal of names for bound variables we don't run into the same problems as before.
-The only thing left to do is to define substitution
+The next ingredient of presented approach to syntax is
+a definition of a substitution.
+Usually we substitute a term for a one distinguished variable.
+We can see set $\ITInc{X}$ as a set with one distinguished value $0$,
+so we define a substitution as a function of the following signature.
 \[
-	\cdot\{\cdot\}:
-  \ITerm{X+1} \times \ITerm{X} \to \ITerm{X}
+	\cdot\{\cdot\}\colon
+  \ITerm{\ITInc{X}} \times \ITerm{X} \to \ITerm{X}
 \]
+Note that if we substitute term $t'$ in $t$ (written $t\{t'\}$)
+then all free variables in $t$ are modified:
+we substitute $t'$ for variable $0$,
+and we change each $\ITSucc\;x$ into $x$.
+Instead of defining substitution directly,
+we start with defining more general \emph{simultaneous substitution}
+for all potentially free variables at once.
 
-and to do that we need to define:
+\begin{figure}[t]
+  \begin{center}
+    \begin{tabular}{p{0.44\textwidth}p{0.49\textwidth}}
+      {$\cdot^\uparrow \colon (X \to Y) \to \ITInc{X} \to \ITInc{Y}$
+      \begin{alignat*}{2}
+        f^\uparrow 0            & = 0 \\
+        f^\uparrow (\ITSucc\;x) & = \ITSucc\;(f \; x)
+      \end{alignat*}} &
+      {$\cdot^\Uparrow \colon (X \to \ITerm{Y}) \to \ITInc{X} \to \ITerm{\ITInc{Y}}$
+      \begin{alignat*}{2}
+        g^\Uparrow 0              & = \ITVar{0} \\
+        g^\Uparrow (\ITSucc \; x) & = \ITSucc^\dagger(g\;x)
+      \end{alignat*}}
+    \end{tabular}
 
-$^* \colon (X \to \ITerm{Y}) \to \ITerm{X} \to \ITerm{Y}$ (also known as \texttt{bind})
+    \begin{tabular}{p{0.44\textwidth}p{0.49\textwidth}}
+      {$\cdot^\dagger \colon (X \to Y) \to \ITerm{X} \to \ITerm{Y}$
+      \begin{alignat*}{2}
+        f^\dagger\ITVar{x}   & = \ITVar{f\;x} \\
+        f^\dagger(\lambda t) & = \lambda(f^{\uparrow\dagger}\;t) \\
+        f^\dagger(t_1\;t_2)  & = (f^\dagger t_1)\;(f^\dagger t_2)
+      \end{alignat*}} &
+      {$\cdot^* \colon (X \to \ITerm{Y}) \to \ITerm{X} \to \ITerm{Y}$
+      \begin{alignat*}{2}
+        g^*\ITVar{x}   & = g\;x \\
+        g^*(\lambda t) & = \lambda (g^{\Uparrow*} \; t) \\
+        g^*(t_1\;t_2)  & = (g^* t_1) \; (g^* t_2)
+      \end{alignat*}}
+    \end{tabular}
+    \caption{Renaming and simultaneous substitution together with
+      their corresponding lifting functions.}
+    \label{fig:syntax_simultaneous_subst}
+  \end{center}
+\end{figure}
 
-\begin{eqnarray*}
-  f^*\ITVar{x}   & = & f\;x \\
-  f^*(\lambda t) & = & \lambda (f^{\Uparrow*} \; t) \\
-  f^*(t_1\;t_2)  & = & (f^* \; t_1) \; (f^* \; t_2)
-\end{eqnarray*}
+Precise definition of simultaneous substitution (function $\cdot^*$) is
+presented in \autoref{fig:syntax_simultaneous_subst}.
+In order to substitute for all free variables in term $t\in\ITerm{X}$
+we need to describe for each variable in $X$
+which term should be substituted for it.
+We do so, by providing a \emph{substitution} function $g\colon X\to\ITerm{Y}$
+(set $Y$ can be any set, possibly unrelated to $X$).
+For each such a function we define simultaneous substitution
+$g^*\colon\ITerm{X}\to\ITerm{Y}$.
+Substitution $g$ in a variable term $\ITVar{x}$ is just $g(x)$,
+as we substitute for all free variables.
+For other language constructs we proceed structurally.
+The case for $\lambda$-abstraction is interesting,
+because we proceed with substitution under the binder.
+Therefore, we have to \emph{lift} substitution~$g$ to
+a function $g^\Uparrow\colon\ITInc{X}\to\ITerm{\ITInc{Y}}$.
+This lifting operation should not affect newly bound variable $0$,
+so it maps $0$ to term $\ITVar{0}$.
+For other variables (of the form $\ITSucc\;x$)
+it returns original $g(x)$
+with all variables \emph{shifted} by one (operation $\ITSucc^\dagger$),
+as the variable $0$ is going to be bound by the nearest $\lambda$-abstraction.
 
-$^\Uparrow \colon (X \to \ITerm{Y}) \to \ITInc{X} \to \ITerm{\ITInc{Y}}$
+We define the shifting operation $\ITSucc^\dagger$
+as a special case of more general \emph{renaming}.
+Given function $f\colon X\to Y$ that renames variables in set $X$
+to those in set~$Y$,
+we define a function $f^\dagger\colon\ITerm{X}\to\ITerm{Y}$
+that applies function $f$ to each free variable in given term.
+Similarly to simultaneous substitution, such a simultaneous renaming
+proceed structurally for each language construct and
+in case of $\lambda$-abstraction
+it has to lift renaming~$f$
+to a function $f^\uparrow\colon\ITInc{X}\to\ITInc{Y}$.
+In case of lifting of renamings
+we don't need any auxiliary function,
+because renamings map variables to variables, not to terms.
 
-\begin{eqnarray*}
-  f^\Uparrow 0 & = & \ITVar{0} \\
-  f^\Uparrow (\ITSucc \; x) & = & \ITSucc^\dagger\;(f\;x) \\
-\end{eqnarray*}
+Given substitution function $g\colon X\to\ITerm{Y}$
+we can extend it by a term $t\in\ITerm{Y}$ and obtain a substitution
+$g[\mapsto t]\colon \ITInc{X}\to\ITerm{Y}$.
+Such an extension is defined as follows.
+\begin{align*}
+  g[\mapsto t]\;0 & = t &
+  g[\mapsto t]\;(\ITSucc\;x) & = g\;x
+\end{align*}
+Now, we are in position to define a substitution for single variable
+\[ t\{t'\} = \eta[\mapsto t']^*\;t \textrm{,} \]
+where $\eta$ is an identity substitution:
+\[ \eta\;x = \ITVar{x}\textrm{.} \]
+Following our intuition, substitution $t\{t'\}$
+substitutes $t'$ for variable $0$
+and other variables of the form $\ITSucc\;x$
+changes to $\ITVar{x}$.
 
-$^\dagger \colon (X \to Y) \to \ITerm{X} \to \ITerm{Y}$ (also known as \texttt{fmap})
+The reader might notice that simultaneous renaming
+and simultaneous substitution
+have the same signatures as \texttt{fmap} and \texttt{bind}
+functions, known from functional programming (or category theory).
+This similarity is not accidental,
+as syntax together with simultaneous renaming form a functor
+which together with simultaneous substitution form a monad.
 
-\begin{eqnarray*}
-  f^\dagger\ITVar{x}   & = & \ITVar{f\;x} \\
-  f^\dagger(\lambda t) & = & \lambda(f^{\uparrow\dagger}\;t) \\
-  f^\dagger(t_1\;t_2)  & = & (f^\dagger\;t_1)\;(f^\dagger\;t_2)
-\end{eqnarray*}
+\begin{lemma}
+  Simultaneous renaming satisfy the following functorial laws
+  (where $\id$ is an identity function,
+  and $\circ$ denotes a function composition):
+  \begin{thmenumerate}
+  \item $\id^\dagger = \id$,
+  \item $(f_1\circ f_2)^\dagger = f_1^\dagger \circ f_2^\dagger$.
+  \end{thmenumerate}
+\end{lemma}
 
-$\uparrow \colon (X \to Y) \to \ITInc{X} \to \ITInc{Y}$
-  (also known as \texttt{fmap} but on \texttt{Maybe})
-
-\begin{eqnarray*}
-  f^\uparrow 0            & = & 0 \\
-  f^\uparrow (\ITSucc\;x) & = & \ITSucc\;(f \; x)
-\end{eqnarray*}
+\begin{lemma}
+  Simultaneous substitution together with unit substitution $\eta$
+  satisfy the following monadic laws:
+  \begin{thmenumerate}
+  \item $g^* \circ \eta = g$,
+  \item $\eta^* = \id$,
+  \item $g_1^* \circ g_2^* = (g_1^* \circ g_2)^*$.
+  \end{thmenumerate}
+\end{lemma}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Unified Syntax-Related Notations}
