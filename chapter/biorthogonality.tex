@@ -15,44 +15,55 @@
 \section{Biorthogonal Closure}
 
 
-$\mathcal{E}R = \{ e \mid \forall E \in \mathcal{K} R. E[e] \in Obs \}$
+$\mathcal{E}R = \{ e \mid \forall E \in \mathcal{K} R. E[e] \in \Obs \}$
 
-$\mathcal{K}R = \{ E \mid \forall v \in R. E[v] \in Obs \}$
+$\mathcal{K}R = \{ E \mid \forall v \in R. E[v] \in \Obs \}$
 
-Type safety: $Obs = \mathsf{Safe}$
+Type safety: $\Obs = \rawSafe$
 
-Termination: $Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
+Termination: $\Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
 
 \begin{lemma}
-  If $e_1 \in E\Denot{\tau_2 \to \tau_1}$ and $e_2 \in E\Denot{\tau_2}$ then $e_1\;e_2 \in E\Denot{\tau_1}$
+  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
+  and $e_2 \in \mathcal{E}\Denot{\tau_2}$
+  then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$.
 \end{lemma}
-\begin{proof}(Sketch)\\
-  To show $e1\;e2 \in \mathcal{E}\Denot{\tau_1}$ \\
+\begin{proof}
   Take any $E \in \mathcal{K}\Denot{\tau_1}$;
-    to show: $E[e1\;e2] = (E\;e2)[e1] \in Obs$ \\
-  To show: $E e2 \in \mathcal{K}\Denot{\tau_1 \to \tau_2}$ \\
-  Take any $v_1 \in \Denot{\tau_1 \to \tau_2}$;
-    to show: $(E e2)[v_1] = E[v_1 e2] = (v_1 E)[E2] \in Obs$ \\
-  To show $v_1\;E \in \mathcal{K}\Denot{\tau_2}$ \\
+    to show: $E[e_1\;e_2] = (E\;e_2)[e_1] \in \Obs$. \\
+  By assumption ($e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$),
+    it suffices to show $E\;e_2 \in \mathcal{K}\Denot{\tau_2 \to \tau_1}$. \\
+  Take any $v_1 \in \Denot{\tau_2 \to \tau_1}$;
+    to show: $(E\;e_2)[v_1] = E[v_1\;e_2] = (v_1\;E)[e_2] \in \Obs$. \\
+  By assumption ($e_2 \in \mathcal{E}\Denot{\tau_2}$),
+    it suffices to show $v_1\;E\in\mathcal{K}\Denot{\tau_2}$. \\
   Take any $v_2 \in \Denot{\tau_2}$;
-   to show: $(v_1 E)\;v_2 = E[v_1\;v_2] \in Obs$
+    to show: $(v_1\;E)\;v_2 = E[v_1\;v_2] \in \Obs$, which holds
+    by the fact that $v_1\in\Denot{\tau_2\to\tau_1}$
+    and assumptions over $v_2$ and $E$.
 \end{proof}
 
-\begin{lemma}
-  If $p \longrightarrow p'$ and $p' \in Obs$, then $p \in Obs$
+\begin{lemma}\label{lem:biortho_obs_red}.
+  If $p \longrightarrow p'$ and $p' \in \Obs$, then $p \in \Obs.$
 \end{lemma}
 
 \begin{lemma}
-  If $\Gamma,x : \tau_1 \models e : \tau_2$ then $\Gamma\models \lambda x.e : \tau_1 \to \tau_2$
+  If $\Gamma,x : \tau_1 \models e : \tau_2$
+  then $\Gamma\models \lambda x.e : \tau_1 \to \tau_2$.
 \end{lemma}
-\begin{proof}(Sketch)\\
+\begin{proof}
   Take any $\gamma \in \Denot{\Gamma}$;
-    to show: $\gamma^*\lambda x.e = \lambda x.\gamma^* e \in \Denot{\tau_1 \to \tau_2}$\\
+    to show: $\gamma^*(\lambda x.e) =
+      \lambda x.\gamma^* e \in \Denot{\tau_1 \to \tau_2}$. \\
   Take any $v \in \Denot{\tau_1}$;
-    to show: $(\lambda x.\gamma^* e)\;v \in \mathcal{E}\Denot{\tau_2}$\\
+    to show: $(\lambda x.\gamma^* e)\;v \in \mathcal{E}\Denot{\tau_2}$.\\
   Take any $E \in \mathcal{K}\Denot{t_2}$;
-    to show: $E[(\lambda x.\gamma^* e)\;v] \in Obs$\\
-  $E[\gamma[x\mapsto v]^* e] \in Obs$
+    to show: $E[(\lambda x.\gamma^* e)\;v] \in \Obs$.\\
+  By \autoref{lem:biortho_obs_red} it suffices to show
+    $E[(\gamma^* e)\{v/x\}] = E[\gamma[x\mapsto v]^* e] \in \Obs$. \\
+  By assumption ($\Gamma,x : \tau_1\models e : \tau_2$)
+    it suffices to show $\gamma[x\mapsto v] \in \Denot{\Gamma,x : \tau_1}$,
+    which can be easily verified by a simple case analysis.
 \end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
