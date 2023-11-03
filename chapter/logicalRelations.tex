@@ -133,31 +133,63 @@ that we will see in this chapter.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Logical Relation}
 
-% From denotation of types to open expressions
-
-$\Denot{\Gamma} = \{\gamma \mid \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)}\}$
-($\gamma \in \Denot{\Gamma} \Longleftrightarrow \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)} $)
-
-$\gamma \colon X \to \syncatset{Value}_{\varnothing}$
-
-$\Gamma \models e \;:\; \tau \Longleftrightarrow
-  \forall \gamma \in \Denot{\Gamma}\ldotp
-  \gamma^*(e) \in \mathcal{E}\Denot{\tau}$
+Equipped with the denotation of types, we would like to define the logical
+relation $\Gamma \models e : \tau$. The sole remaining difficulty is that the
+expression $e$ might be open, and so we cannot use $\mathcal{E}\Denot{\tau}$
+directly, as it only contains closed expressions. We can close $e$ by
+substituting closed values for its free variables, and check if the resulting
+expression is in $\mathcal{E}\Denot{\tau}$ for any assignment of values.
+However, given an expression that is well-typed in $\Gamma$, this substitution
+should not be able to produce something that is clearly ill-behaved,
+\emph{e.g.}, by substituting $\texttt{()}$ as the left-hand side of function
+application. As we expect $\Gamma$ to assign a type to every free variable of
+$e$, we can use the denotation of this type as the source of values that are of
+the correct semantic type. Therefore, we can interpret the entire environment
+as the set of substitutions that are pointwise semantically well-typed,
+\emph{i.e.},
+\[
+  \Denot{\Gamma} = \{\gamma : \dom(\Gamma) \to \syncatset{Value}_{\varnothing}
+    \mid \forall x\ldotp \gamma(x) \in \Denot{\Gamma(x)}\}.
+\]
+Now we can define the logical relation as
+\[
+  \Gamma \models e \;:\; \tau \iff
+   \forall \gamma \in \Denot{\Gamma}\ldotp
+   \gamma^*(e) \in \mathcal{E}\Denot{\tau}.
+\]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Soundness}
+
+To obtain any theorems about syntactically well-typed programs by using the
+logical relation, we must first establish soundness. This step is so essential
+that this theorem is often called the \emph{Fundamental Property} of the
+logical relation.
 
 \begin{theorem}[Fundamental Property]
   If $\Gamma \vdash e \;:\; \tau$ then $\Gamma \models e \;:\; \tau$.
 \end{theorem}
 
+The other necessary ingredient is to ask whether our logical relation is
+\emph{adequate} for proving the properties that we are interested in. After
+all, a relation that holds for all triples of environments, expressions and
+types trivially satisfies the Fundamental Property, but is hardly useful. In
+order to obtain type safety, we state the adequacy theorem as below.
+
 \begin{theorem}[Adequacy]
   For any $e \in \mathcal{E}R$ we have $\Safe{e}$.
 \end{theorem}
 
+Given the similarity between the definitions of $\mathcal{E}R$ and $\rawSafe$,
+it is not hard to see that adequacy holds. As a corollary of the Fundamental
+Property and adequacy, we get type safety.
+
 \begin{theorem}[Type safety]
   If $\emptyset \vdash e : \tau$ then $\Safe{e}$.
 \end{theorem}
+
+Before we turn to the proof of the Fundamental Property, we will state
+two preliminary lemmas about the expression closure.
 
 \begin{lemma}\label{lem:lr-val-in-eclo}
   For any semantic type $R$ and value $v \in R$
@@ -168,12 +200,25 @@ $\Gamma \models e \;:\; \tau \Longleftrightarrow
   If $e \longrightarrow e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$.
 \end{lemma}
 
-In order to prove Fundamental Property
-we show series of \emph{compatibility lemmas}.
+\autoref{lem:lr-val-in-eclo} lets us show that a value is in $\mathcal{E} R$ by
+directly using the semantic type $R$. It follows directly from the definition of
+$\mathcal{E}$.
+\autoref{lem:lr-eclo-red} says that $\mathcal{E} R$ is
+preserved by backward reduction. The seemingly unusual direction of the
+reduction is helpful for proving that an expression is in $\mathcal{E} R$,
+since by applying this lemma it is enough to show that it is in $\mathcal{E} R$
+after performing a reduction step.
+We can prove this lemma by unfolding the definition of $\mathcal{E}$ and
+utilizing the fact that the reduction relation is deterministic.
+
+In order to prove the Fundamental Property,
+we show a series of \emph{compatibility lemmas}.
 Each of them corresponds to one typing rule.
+We present the proofs of compatibility for the rules for $\lambda$-abstraction
+and application.
 
 \begin{lemma}
-  $\Gamma \models () \;:\; \mathtt{Unit}$
+  $\Gamma \models () \;:\; \mathtt{Unit}$.
 \end{lemma}
 
 \begin{lemma}
@@ -201,10 +246,10 @@ Each of them corresponds to one typing rule.
     = \gamma[x\mapsto v]^* e \in \mathcal{E}\Denot{\tau_2}$. \\
   By assumption, it suffices to show
     $\gamma[x\mapsto v] \in \Denot{\Gamma, x : \tau_1}$,
-  which is easy to verify by case analysis on variable.
+  which is easy to verify by case analysis on variables.
 \end{proof}
 
-For convenience, we prove compatibility lemma for application
+For convenience, we prove the compatibility lemma for application
 for closed terms first.
 
 \begin{lemma}\label{lem:lr-compat-app-cl}
@@ -213,15 +258,16 @@ for closed terms first.
   then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$.
 \end{lemma}
 \begin{proof}
-  Pick any $e'$ such that $e_1\;e_2 \longrightarrow^* e'$.
-  We have three, the following cases.
+  Take any $e'$ such that $e_1\;e_2 \longrightarrow^* e'$.
+  We have the following three cases.
   \begin{enumerate}[label=(\roman*)]
-  \item $e_1 \longrightarrow^* e_1'$ (not a value) and $e' = e_1'\;e_2$.
-    By assumption we have $e_1' \longrightarrow e_1''$
+  \item $e_1 \longrightarrow^* e_1'$
+    (where $e_1'$ is not a value) and $e' = e_1'\;e_2$.
+    By assumption we have $e_1' \longrightarrow e_1''$,
     and therefore, $e' \longrightarrow e_1''\;e_2$.
   \item $e_1 \longrightarrow^* v_1$, $e_2\longrightarrow e_2'$
-    (not a value) and $e' = v_1\;e_2'$.
-    By assumption we have $e_2' \longrightarrow e_2''$
+    (where $e_2'$ is not a value) and $e' = v_1\;e_2'$.
+    By assumption we have $e_2' \longrightarrow e_2''$,
     and therefore, $e' \longrightarrow v_1\;e_2''$.
   \item $e_1 \longrightarrow^* v_1$, $e_2 \longrightarrow^* v_2$
     and $v_1\;v_2 \longrightarrow^* e'$.
@@ -243,9 +289,8 @@ for closed terms first.
   Directly from \autoref{lem:lr-compat-app-cl}.
 \end{proof}
 
-\medskip
-
-Using Compatibility Lemmas proof of Fundamental Property is straightforward induction.
+Using the compatibility lemmas, the proof of the Fundamental Property is
+a straightforward induction on the typing derivation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Termination of Simply-Typed Lambda Calculus}
