@@ -293,16 +293,88 @@ Using the compatibility lemmas, the proof of the Fundamental Property is
 a straightforward induction on the typing derivation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Termination of Simply-Typed Lambda Calculus}
+\section{Termination of the Simply-Typed Lambda Calculus}
 
-\begin{theorem}{Termination}
+Although we used the logical relation to prove type safety, most of our
+definitions were based on much more general intuitions about the semantics, and
+only the expression closure operator $\mathcal{E}$ at all resembled the desired
+property.
+This gives us hope that by changing its definition, we can show other
+properties with only minimal modifications to the proofs pertaining to the
+logical relation.
+One such property is \emph{termination}, which we can state as follows.
+
+\begin{theorem}[Termination]
   If $\emptyset \vdash e \;:\; \tau$ then
   there exists $v$ such that $e \longrightarrow^* v$.
 \end{theorem}
 
-To prove termination we will change definition of $\mathcal{E}$ to reflect that fact.
+We can change the definition of the expression closure operator to encode
+termination, with the additional condition that the resulting value is of the
+appropriate semantic type:
+\[
+  \mathcal{E}R = \{ e \mid \exists v \in R\ldotp e \longrightarrow^* v \}.
+\]
+The denotation of types remains the same. However, we need to change our notion
+of adequacy to match the theorem to be proven.
 
-$\mathcal{E}R = \{ e \mid \exists v \in R\ldotp e \longrightarrow^* v \}$
+\begin{theorem}[Adequacy]
+  For any $e \in \mathcal{E}R$ there exists $v$ such that
+  $e \longrightarrow^* v$.
+\end{theorem}
+
+The statements of the other theorems and lemmas are unchanged. Let us now
+examine how their proofs are affected. We still want the two lemmas about
+$\mathcal{E}$ to hold. The proofs do have to be redone, but they are no
+harder than before.
+
+\begin{lemma}\label{lem:lr-val-in-eclo-sn}
+  For any semantic type $R$ and value $v \in R$
+  we have $v \in \mathcal{E}R$.
+\end{lemma}
+
+\begin{lemma}\label{lem:lr-eclo-red-sn}
+  If $e \longrightarrow e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$.
+\end{lemma}
+
+By induction, we can also generalize \autoref{lem:lr-eclo-red-sn} to reduction
+in many steps.
+
+\begin{lemma}\label{lem:lr-eclo-red-rtc-sn}
+  If $e \longrightarrow^* e'$ and $e' \in \mathcal{E}R$ then $e \in \mathcal{E}R$.
+\end{lemma}
+
+In the first three compatibility lemmas---for the unit value, variables
+and $\lambda$-abstractions---we can use \autoref{lem:lr-val-in-eclo-sn} and
+never unfold the definition of $\mathcal{E}$, so the original proofs still go
+through.
+As the (closed version of) compatibility for application uses the
+expression closure directly, we have to revisit its proof.
+
+\begin{lemma}\label{lem:lr-compat-app-cl-sn}
+  If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
+  and $e_2 \in \mathcal{E}\Denot{\tau_2}$
+  then $e_1\;e_2 \in \mathcal{E}\Denot{\tau_1}$.
+\end{lemma}
+\begin{proof}
+  From the assumptions we have $v_1 \in \Denot{\tau_2 \to \tau_1}$ such
+  that $e_1 \longrightarrow^* v_1$, and $v_2 \in \Denot{\tau_2}$ such
+  that $e_2 \longrightarrow^* v_2$. \\
+  By \autoref{lem:lr-eclo-red-rtc-sn} and properties of
+  reduction it suffices to show $v_1\;v_2 \in \mathcal{E}\Denot{\tau_1}$,
+  which follows from the definition of $\Denot{\tau_2 \to \tau_1}$
+  and the assumptions.
+\end{proof}
+
+To prove termination, we did not have to start from scratch: we only modified
+a few of the proofs to account for the new definition of $\mathcal{E}$.
+This already shows us some of the versatility of logical relations as
+compared to the traditional techniques we have used in the previous chapter.
+However, the two different proofs of the compatibility lemma for application
+were quite different from each other, and somewhat convoluted due to requiring
+tedious reasoning about multi-step reductions on subexpressions.
+In the next chapter we will see how to fix these flaws, and also make the
+logical relation genuinely modular with respect to the considered property.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
