@@ -1,7 +1,30 @@
 \chapter{Biorthogonal Logical Relations}
 
-% some motivation goes here: closure for expressions vs global properties
-% of complete programs
+In the last chapter we quietly skipped over this fact, but properties such
+as type safety or termination are really properties of complete programs,
+rather than of individual expressions. For the vanilla simply-typed lambda
+calculus, this distinction is not crucial. However, as we have seen in
+\autoref{sec:non-local-red}, once we add control operators such as
+\texttt{call/cc}, reduction must be defined for complete programs, since we
+need knowledge of the surrounding context.
+
+This has a profound effect on our treatment of logical relations so far.
+Whereas previously we could rely on properties of reduction that talked
+about the reduction of subexpressions, such as $e_1 \longrightarrow^* e_1'$
+implying $e_1\;e_2 \longrightarrow^* e_1'\;e_2$, this is no longer the case in
+the presence of non-local control flow. Consider the simple program
+\[
+  (\mathcal{K} k\ldotp \lambda x\ldotp k\;x)\;(\lambda x\ldotp \texttt{()}).
+\]
+Clearly, we should not attempt to perform any reduction on the subexpression
+$(\mathcal{K} k\ldotp \lambda x\ldotp k\;x)$ alone, since then we would
+reify the incorrect context. Thus, the reasoning we used in the proofs of
+\autoref{lem:lr-compat-app-cl} and \autoref{lem:lr-compat-app-cl-sn} is not
+only inelegant, but also invalid for more sophisticated calculi.
+This also suggests that our previous attempts at defining the expression
+closure operator will not do in this case, since we demanded \emph{all}
+expressions to fulfill the global program properties of type safety and
+termination.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type System for \texttt{call/cc}}
