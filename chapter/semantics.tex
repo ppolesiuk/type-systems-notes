@@ -23,8 +23,8 @@
 \section{Expressions, Values, and Operational Semantics}
 
 \begin{alignat*}{2}
-  e & \Coloneqq v \mid e\;e         \tag{expressions} \\
-  v & \Coloneqq \lambda x.e \mid x  \tag{values}
+  \syncatset{Expr}  & \ni e && \Coloneqq v \mid e\;e         \tag{expressions} \\
+  \syncatset{Value} & \ni v && \Coloneqq \lambda x.e \mid x  \tag{values}
 \end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +64,7 @@ is more compact representation of structural congruence rules.
 \end{mathpar}
 
 \begin{alignat*}{2}
-  E & \Coloneqq \square \mid E \; e \mid v \; E
+  \syncatset{Ectx} & \ni E && \Coloneqq \square \mid E \; e \mid v \; E
 \end{alignat*}
 
 Evaluation contexts can be represented in two styles:
@@ -138,11 +138,12 @@ Figures below show these contexts for $1 + (\square - 2)$.
 \label{sec:non-local-red}
 
 \begin{alignat*}{2}
-  p & \Coloneqq e
+  \syncatset{Prog} & \ni p && \Coloneqq e
     \tag{programs} \\
-  e & \Coloneqq v \mid e\;e \mid \mathcal{K} x.e \mid \mathcal{A} p
+  \syncatset{Expr} & \ni e && \Coloneqq v
+    \mid e\;e \mid \mathcal{K} x.e \mid \mathcal{A} p
     \tag{expressions} \\
-  v & \Coloneqq x \mid v
+  \syncatset{Value} & \ni v && \Coloneqq x \mid v
     \tag{values}
 \end{alignat*}
 

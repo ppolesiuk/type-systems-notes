@@ -5,9 +5,12 @@
 
 
 \begin{alignat*}{2}
-  \tau & \Coloneqq \tau \to \tau \mid \forall\alpha.\tau \mid \alpha \tag{types}\\
-  e & \Coloneqq v \mid e\;e \mid e\;* \tag{expressions} \\
-  v & \Coloneqq \lambda x.e \mid x \mid \Lambda e \tag{values}
+  \syncatset{Type} & \ni \tau && \Coloneqq
+    \tau \to \tau \mid \forall\alpha.\tau \mid \alpha \tag{types}\\
+  \syncatset{Expr} & \ni e && \Coloneqq
+    v \mid e\;e \mid e\;* \tag{expressions} \\
+  \syncatset{Value} & \ni v && \Coloneqq
+    \lambda x.e \mid x \mid \Lambda e \tag{values}
 \end{alignat*}
 
 \begin{mathpar}

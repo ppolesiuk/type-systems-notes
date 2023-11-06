@@ -7,11 +7,23 @@ Throughout the remainder of these lecture notes, we will specify the abstract
 syntax of various elements of the considered calculi in the form of a grammar,
 such as the following grammar of the plain $\lambda$-calculus.
 \begin{alignat*}{2}
-  &x, y, z, \dots \span\span \tag{variables} \\
-  &t &&\Coloneqq x \mid \lambda x\ldotp t \mid t\;t \tag{terms}
+  \syncatset{Var}  &\ni x, y, z, \dots \span\span \tag{variables} \\
+  \syncatset{Term} &\ni t &&\Coloneqq x \mid \lambda x\ldotp t \mid t\;t \tag{terms}
 \end{alignat*}
-There are only two syntactic categories in this grammar: variables
-($x, y, z, \dots$) and terms ($t$). A term can be a variable,
+There are only two syntactic categories in this grammar: variables and terms.
+For each syntactic category we define a set of all its elements:
+$\syncatset{Var}$ is a set of all variables
+and $\syncatset{Term}$ is a set of all terms.
+Moreover, we assign one or more \emph{metavariables}
+to each syntactic category: $x, y, z, \dots$ for variables
+and $t$ for terms.
+By convention, whenever we write some math variable with a name based on $t$
+(\emph{e.g.}, $t'$, $t_1$, $t_2''$) we implicitly assume
+that it describes an element of set $\syncatset{Term}$.
+
+Terms are defined by a set of productions given on the
+right-hand-side of~$\Coloneqq$.
+A term can be a variable,
 a $\lambda$-abstraction, or an application of one term to another.
 As this grammar is supposed to represent the \emph{abstract syntax trees},
 rather than the strings of any particular concrete syntax, we do not consider
