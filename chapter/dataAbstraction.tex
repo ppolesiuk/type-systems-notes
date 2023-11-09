@@ -44,7 +44,7 @@ $\Pack{(\Lambda \lambda x \ldotp \lambda y \ldotp \lambda f \ldotp f\;x\;y,
 \section{Contextual Equivalence}
 
 $\Delta, \Gamma \models e_1 \simeq_{ctx} e_2 : \tau \Longleftrightarrow
-  \forall C \ldotp \exists \tau' \ldotp C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Rightarrow C[e_1] \simeq_{obs} C[e_2]$
+  \forall C \ldotp \forall \tau' \ldotp C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Rightarrow C[e_1] \simeq_{obs} C[e_2]$
 
 $C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Longleftrightarrow
   \forall e \in \mathcal{E}\Denot{\tau} \ldotp \Gamma,\Delta\models C[e] \colon \tau'$
