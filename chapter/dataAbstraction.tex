@@ -3,8 +3,51 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Existential Types}
 
+\newcommand\Pack[1]{\texttt{pack}\;#1}
+\newcommand\Unpack[3]{\texttt{unpack}\;#1 = #2\;\texttt{in}\;#3}
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq \ldots \mid \exists\alpha.\tau \\
+  e    & \Coloneqq \ldots \mid \Pack{e} \mid \Unpack{x}{e}{e} \\
+  v    & \Coloneqq \ldots \mid \texttt{pack}\;v
+\end{alignat*}
+
+\begin{mathpar}
+  \inferrule{\Delta, \Gamma \vdash e \colon \tau\{\tau'/\alpha\}}
+            {\Delta, \Gamma \vdash \Pack{e} \colon \exists\alpha.\tau}
+
+  \inferrule{\Delta, \Gamma \vdash e_1 \colon \exists\alpha.\tau \\
+             \Delta, \alpha, \Gamma, x \colon \tau \vdash e_2 : \tau'}
+            {\Delta, \Gamma \vdash \Unpack{x}{e_1}{e_2} : \tau'}
+\end{mathpar}
+
+\begin{mathpar}
+  \inferrule{ }
+            {\Unpack{x}{\Pack{v}}{e} \rightharpoonup e\{v/x\}}
+\end{mathpar}
+
+Abstract interface for pairs (constructor, left selector, right selector):
+
+$\exists\alpha.(\tau_1 \to \tau_2 \to \alpha) \times (\alpha \to \tau_1) \times (\alpha \to \tau_2)$
+
+Implementation using "regular" pairs:
+
+$\Pack{(\lambda x \ldotp \lambda y \ldotp (x,y), \lambda p \ldotp \pi_1 p, \lambda p \ldotp \pi_2 p)}$
+
+Implementation using church encoding:
+
+$\Pack{(\Lambda \lambda x \ldotp \lambda y \ldotp \lambda f \ldotp f\;x\;y,
+        \lambda p \ldotp p *(\lambda x \ldotp \lambda y \ldotp x),
+        \lambda p \ldotp p *(\lambda x \ldotp \lambda y \ldotp y))}$
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Contextual Equivalence}
+
+$\Delta, \Gamma \models e_1 \simeq_{ctx} e_2 : \tau \Longleftrightarrow
+  \forall C \ldotp \forall \tau' \ldotp C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Rightarrow C[e_1] \simeq_{obs} C[e_2]$
+
+$C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Longleftrightarrow
+  \forall e \in \mathcal{E}\Denot{\tau} \ldotp \Gamma,\Delta\models C[e] \colon \tau'$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Binary Logical Relations}
