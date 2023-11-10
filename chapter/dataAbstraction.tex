@@ -13,12 +13,12 @@
 \end{alignat*}
 
 \begin{mathpar}
-  \inferrule{\Delta, \Gamma \vdash e \colon \tau\{\tau'/\alpha\}}
-            {\Delta, \Gamma \vdash \Pack{e} \colon \exists\alpha.\tau}
+  \inferrule{\Delta; \Gamma \vdash e \colon \tau\{\tau'/\alpha\}}
+            {\Delta; \Gamma \vdash \Pack{e} \colon \exists\alpha.\tau}
 
-  \inferrule{\Delta, \Gamma \vdash e_1 \colon \exists\alpha.\tau \\
-             \Delta, \alpha, \Gamma, x \colon \tau \vdash e_2 : \tau'}
-            {\Delta, \Gamma \vdash \Unpack{x}{e_1}{e_2} : \tau'}
+  \inferrule{\Delta; \Gamma \vdash e_1 \colon \exists\alpha.\tau \\
+             \Delta, \alpha; \Gamma, x \colon \tau \vdash e_2 : \tau'}
+            {\Delta; \Gamma \vdash \Unpack{x}{e_1}{e_2} : \tau'}
 \end{mathpar}
 
 \begin{mathpar}
@@ -43,11 +43,30 @@ $\Pack{(\Lambda \lambda x \ldotp \lambda y \ldotp \lambda f \ldotp f\;x\;y,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Contextual Equivalence}
 
-$\Delta, \Gamma \models e_1 \simeq_{ctx} e_2 : \tau \Longleftrightarrow
-  \forall C \ldotp \forall \tau' \ldotp C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Rightarrow C[e_1] \simeq_{obs} C[e_2]$
+General closing contexts
 
-$C \colon (\Delta, \Gamma, \tau) \leadsto \tau' \Longleftrightarrow
-  \forall e \in \mathcal{E}\Denot{\tau} \ldotp \Gamma,\Delta\models C[e] \colon \tau'$
+\begin{alignat*}{2}
+  C & \Coloneqq \ldots
+\end{alignat*}
+
+We define a relation for typing closing contexts:
+\[
+  C \colon (\Delta; \Gamma \vdash \tau) \leadsto \tau'
+    \quad\Longleftrightarrow\quad
+    \forall e\ldotp (\Delta; \Gamma \vdash e \;:\;\tau) \Rightarrow
+      \Delta;\Gamma \vdash C[e] \colon \tau'
+\]
+
+Alternatively, typing of closing contexts can be defined by
+a set of inference rules.
+
+\begin{defin}[Contextual Equivalence]
+  Expressions $e_1$ and $e_2$ are \emph{contextually equivalent}
+  (written $\Delta; \Gamma \models e_1 \simeq_{ctx} e_2$)
+  iff for any closing context $C$ such that $C : (\Delta;\Gamma\vdash\tau) \leadsto \tau'$
+  for some $\tau'$
+  we have $C[e_1] \simeq_{obs} C[e_2]$.
+\end{defin}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Binary Logical Relations}
