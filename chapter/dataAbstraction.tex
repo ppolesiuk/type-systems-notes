@@ -46,7 +46,7 @@ $\Pack{(\Lambda \lambda x \ldotp \lambda y \ldotp \lambda f \ldotp f\;x\;y,
 General closing contexts
 
 \begin{alignat*}{2}
-  C & \Coloneqq \ldots
+  C & \Coloneqq \square \mid C\;e \mid e\;C \mid \lambda x.C \mid \ldots
 \end{alignat*}
 
 We define a relation for typing closing contexts:
@@ -60,6 +60,14 @@ We define a relation for typing closing contexts:
 Alternatively, typing of closing contexts can be defined by
 a set of inference rules.
 
+Similarly to definition of $\Obs$ in \autoref{sec:biorthogonal-closure}:
+
+\begin{defin}[Observational Equivalence]
+  Programs $p_1$ and $p_2$ are \emph{observationally equivalent}
+  (written $p_1 \simeq_{obs} p_2$)
+  iff $p_1 \Downarrow \iff p_2 \Downarrow$.
+\end{defin}
+
 \begin{defin}[Contextual Equivalence]
   Expressions $e_1$ and $e_2$ are \emph{contextually equivalent}
   (written $\Delta; \Gamma \models e_1 \simeq_{ctx} e_2$)
@@ -70,6 +78,56 @@ a set of inference rules.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Binary Logical Relations}
+\[
+  \semcatset{Type} = \mathcal{P}(\syncatset{Value}_{\varnothing}^2),
+\]
+
+\[
+  \Denot{\cdot} \colon \syncatset{Type} \to \semcatset{Type}
+\]
+
+\begin{alignat*}{2}
+  \Denot{\texttt{Unit}}_{\eta} & = \{ (\texttt{()}, \texttt{()}) \} \\
+  \Denot{\tau_1 \to \tau_2}_{\eta} & = \{ (v_1, v_2) \mid
+    \forall (v_1', v_2') \in \Denot{\tau_1}_{\eta}\ldotp
+    (v_1\;v_1', v_2\;v_2' ) \in \mathcal{E}\Denot{\tau_2}_{\eta} \} \\
+  \Denot{\forall\alpha.\tau}_{\eta} & = \{ (v_1, v_2) \mid \forall R \in \semcatset{Type}.
+    (v_1\;*, v_2\;*) \in \mathcal{E}\Denot{\tau}_{\eta[\alpha \mapsto R]} \} \\
+  \Denot{\alpha}_{\eta} & = \eta(\alpha) \\
+  \Denot{\exists\alpha.\tau}_{\eta} & =
+    \{ (\texttt{pack}\;v_1,\texttt{pack}\;v_2) \mid \exists R \in \semcatset{Type}.
+    (v_1, v_2) \in \mathcal{E}\Denot{\tau}_{\eta[\alpha \mapsto R]} \} \\\\
+  \mathcal{E}R & = \{ (e_1, e_2) \mid \forall (E_1, E_2) \in \mathcal{K} R. E_1[e_1] \simeq_{obs}  E_2[e_2]\}\\
+  \mathcal{K}R & = \{ (E_1, E_2) \mid \forall (v_1, v_2) \in R. E_1[v_1] \simeq_{obs}  E_2[v_2]\}\\
+\end{alignat*}
+
+
+\begin{defin}[Logical Equivalence]
+  Expressions $e_1$ and $e_2$ are \emph{logically equivalent}
+  (written $\Delta; \Gamma \models e_1 \simeq_{log} e_2$)
+  iff
+  \[
+    \forall \eta \colon \Delta \to \semcatset{Type}\ldotp
+    \forall (\gamma_1, \gamma_2) \in \Denot{\Gamma}_{\eta} \\
+    (\gamma_1^*e_1, \gamma_2^*e_2) \in \mathcal{E}\Denot{\tau}_{\eta}
+  \].
+\end{defin}
+
+\begin{theorem}[Fundamental Property]
+  If $\Delta; \Gamma \vdash e \;:\; \tau$ then $\Delta; \Gamma \models e \simeq_{log} e \;:\; \tau$.
+\end{theorem}
+
+\begin{theorem}[Soundness]
+  If $\Delta; \Gamma \models e_1 \simeq_{log} e_2 \;:\; \tau$
+  then $\Delta; \Gamma \models e_1 \simeq_{ctx} e_2 \;:\; \tau$.
+  This can be simply written as $\simeq_{log} \subseteq \simeq_{ctx}$.
+\end{theorem}
+
+\begin{lemma}[Compatibility for $\lambda$]
+  If $\Delta; \Gamma, x : \tau_1 \models e_1 \simeq_{log} e_2 \;:\; \tau_2$ then
+  $\Delta; \Gamma \models \lambda x.e_1 \simeq_{log} \lambda x.e_2 \;:\; \tau_1 \to \tau_2$.
+\end{lemma}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
