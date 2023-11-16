@@ -5,11 +5,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Denotational Semantics}
 
-\[
-\Denot{\cdot} \colon
+Denotational semantics talks about the result of a computation, without specifying the process. We interpret terms as objects from some domain $\mathcal{D}$, which consists of mathematical structures designed to reflect meanings of programs. 
+
+In the Logic course, we have already seen an example of denotational semantics, namely the denotational semantics of propositional calculus. Our terms were propositional formulae and our domain was the set $\{ \mathbf{T}, \mathbf{F} \}$. We discussed valuations $\sigma$ of propositional variables. For any such $\sigma$, we defined the valuation $\hat{\sigma}$ of formulae. For instance, if we needed to express that the formula $p \lor q$ is true under valuation $\sigma$, we wrote $\hat{\sigma}(p \lor q) = \mathbf{T}$. Switching to a different notation, one may write $\Denot{p \lor q}_\sigma = \mathbf{T}$.
+
+Below, the environment $\rho$ is the equivalent of propositional $\sigma$. The function $\varphi$ turns denotations of lambda-abstractions into functions on denotations (limited in some reasonable way). The function $\psi$ works in the other way.
+
+\begin{align*}
+\Denot{\cdot} &\colon
   \syncatset{Term} \times (\syncatset{Var} \rightarrow \mathcal{D})
-    \rightarrow \mathcal{D}_{\bot}
-\]
+    \rightarrow \mathcal{D}_{\bot} \\
+\varphi &\colon \mathcal{D} \rightarrow (\mathcal{D} \stackrel{\text{cont}}{\rightarrow} \mathcal{D}_\bot) \\
+\psi &\colon (\mathcal{D} \stackrel{\text{cont}}{\rightarrow} \mathcal{D}_\bot) \rightarrow \mathcal{D}
+\end{align*}
 
 \begin{alignat*}{2}
   \Denot{x}_\rho & = \rho(x) \\
@@ -21,20 +29,21 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Expressions, Values, and Operational Semantics}
+Operational semantics concerns the execution of programs. Here, it will come in handy to distinguish between expressions and values among terms, since values cannot undergo any further computation. 
 
 \begin{alignat*}{2}
   \syncatset{Expr}  & \ni e && \Coloneqq v \mid e\;e         \tag{expressions} \\
   \syncatset{Value} & \ni v && \Coloneqq \lambda x.e \mid x  \tag{values}
 \end{alignat*}
 
+Operational semantics can be divided into big-step semantics and small-step semantics. The former defines a relation which signifies the evaluation of an expression to a value. It is, however, unable to say things about programs that never terminate. In contrast, the latter describes the elementary steps in the execution of a program, where an expression reduces to an expression which may or may not be a value.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Operational Semantics}
-
-We can classify evaluation rules to:
+Structural operational semantics falls into the category of small-step semantics. We can classify evaluation rules to:
 \begin{itemize}
-    \item reduction rules, which do computations (e.g. application rule below)
+    \item reduction rules, which do computations (e.g. application rule below),
     \item structural congruence rules, which indicate when and which subterms can be evaluated;
-        they define evaluation order
+        they define evaluation order.
 \end{itemize}
 
 \begin{mathpar}
@@ -48,12 +57,13 @@ We can classify evaluation rules to:
             {v \; e \longrightarrow v \; e'}
 \end{mathpar}
 
+The process of evaluation is defined unambiguously. The congruence rules allow us to deduce a computation step in a big, nested expression from a step in its subexpression. Unfortunately, the subexpression's surroundings, i.e. the context, are forgotten. This will become a disadvantage once we get to control flow operators such as \texttt{call/cc}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evaluation Contexts and Reduction Semantics}
-
-Evaluation context $E$ represents the rest of the computation during evaluation.
-Current position is called the hole $\square$. Evaluation context's grammar
-is more compact representation of structural congruence rules.
+Reduction semantics is another kind of small-step semantics.
+The evaluation context $E$ represents the rest of the computation during evaluation.
+Current position is called the hole $\square$. Evaluation contexts' grammar
+is a more compact representation of structural congruence rules.
 
 \begin{mathpar}
   \inferrule{\phantom{e}}
