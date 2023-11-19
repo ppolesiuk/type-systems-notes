@@ -54,7 +54,7 @@ We define a relation for typing closing contexts:
   C \colon (\Delta; \Gamma \vdash \tau) \leadsto \tau'
     \quad\Longleftrightarrow\quad
     \forall e\ldotp (\Delta; \Gamma \vdash e \;:\;\tau) \Rightarrow
-      \Delta;\Gamma \vdash C[e] \colon \tau'
+      \varnothing;\varnothing \vdash C[e] \colon \tau'
 \]
 
 Alternatively, typing of closing contexts can be defined by
