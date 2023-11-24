@@ -1,10 +1,85 @@
 \chapter{Type Reconstruction}
 
+\newcommand\UVarX{?\!X}
+\newcommand\UVarY{?\!Y}
+\newcommand\UVarZ{?\!Z}
+\newcommand\unify{\stackrel{?}{=}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simple Types}
 
+Syntax of types with unification variables:
+$\tau \Coloneqq \tau \to \tau \mid \syncatset{Bool} \mid \UVarX$
+
+Inference rules:
+
+\begin{mathpar}
+  \inferrule{(x : \tau) \in \Gamma}
+            {\Gamma\vdash x \Uparrow \tau / \emptyset}
+
+  \inferrule{\Gamma, x : \UVarX \vdash e \Uparrow \tau_2 / \theta}
+            {\Gamma\vdash \lambda x.e \Uparrow \theta^*(\UVarX) \to \tau_2 / \theta}
+
+  \inferrule{\Gamma\vdash e_1 \Uparrow \tau_2 \to \tau_1 / \theta_1 \\ \Gamma\vdash e_2 \Downarrow \tau_2 / \theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \tau_1 / \theta_2 \circ \theta_1}
+
+  \\\\
+
+  \inferrule{\Gamma\vdash e_1 \Uparrow \UVarX / \theta_1 \\ \theta_1'^*\Gamma\vdash e_2 \Downarrow \UVarY / \theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \theta_2^*(\UVarZ) / \theta_2 \circ \theta_1'}
+
+  \text{where }\theta_1' = \theta_1[\UVarX \mapsto \UVarY \to \UVarZ]
+
+  \inferrule{\Gamma\vdash e \Uparrow \tau' / \theta \\ \theta^*\tau \unify \tau' / \theta'}
+            {\Gamma\vdash e \Downarrow \tau / \theta' \circ \theta}
+\end{mathpar}
+
+Type unification:
+
+\begin{mathpar}
+  \inferrule{ }
+            {\syncatset{Bool} \unify \syncatset{Bool} / \emptyset}
+
+  \inferrule{\tau_1 \unify \tau_2 / \theta_1 \\ \theta_1^* \tau_2 \unify \theta_1^* \tau_2'}
+            {\tau_1 \to \tau_1' \unify \tau_2 \to \tau_2' / \theta_2 \circ \theta_1}
+
+  \inferrule{ }
+            {\UVarX \unify \UVarX / \emptyset}
+
+  \inferrule{\UVarX \not\in \text{fuv}(\tau) }
+            {\UVarX \unify \tau / [\UVarX \mapsto \tau]}
+
+  \inferrule{\UVarX \not\in \text{fuv}(\tau) }
+            {\tau \unify \UVarX / [\UVarX \mapsto \tau]}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Imperative Representation of Terms}
+
+\begin{verbatim}
+  type tp_view = 
+    | Bool
+    | Arr of tp * tp
+    | UVar of uvar
+  and uvar = tp option ref
+  and tp = tp_view
+
+  let rec view tp = 
+    match tp with
+    | UVar x ->
+      match !x with
+      | None -> tp
+      | Some tp ->
+        let t = view tp in
+        x := Some t;
+        t
+      end
+    | _ -> tp
+
+  let set_uvar u t =
+    (* here we can assert that u is None *)
+    u := Some t
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
