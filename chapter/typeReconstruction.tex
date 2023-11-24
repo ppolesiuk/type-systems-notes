@@ -3,8 +3,74 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simple Types}
 
+Syntax of types with unification variables:
+$\tau \Coloneqq \tau \to \tau \mid \syncatset{Bool} \mid ?X$
+
+Inference rules:
+
+\newcommand\unify{\stackrel{?}{=}}
+
+\begin{mathpar}
+  \inferrule{(x : \tau) \in \Gamma}
+            {\Gamma\vdash x \Uparrow \tau / \emptyset}
+
+  \inferrule{\Gamma, x : ?X \vdash e \Uparrow \tau_2 / \Theta}
+            {\Gamma\vdash \lambda x.e \Uparrow \Theta^*(?X) \to \tau_2 / \Theta}
+
+  \inferrule{\Gamma\vdash e_1 \Uparrow \tau_2 \to \tau_1 / \Theta_1 \\ \Gamma\vdash e_2 \Downarrow \tau_2 / \Theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \tau_1 / \Theta_2 \circ \Theta_1}
+
+  \inferrule{\Gamma\vdash e_1 \Uparrow ?X / \Theta_1 \\ \Theta_1'^*\Gamma\vdash e_2 \Downarrow ?Y / \Theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \Theta_2^*(?Z) / \Theta_2 \circ \Theta_1'}
+
+  \text{where }\Theta_1' = \Theta_1[?X \mapsto ?Y \to ?Z]
+
+  \inferrule{\Gamma\vdash e \Uparrow \tau' / \Theta \\ \Theta^*\tau \unify \tau' / \Theta'}
+            {\Gamma\vdash e \Downarrow \tau / \Theta' \circ \Theta}
+\end{mathpar}
+
+Type unification:
+
+\begin{mathpar}
+  \inferrule{ }
+            {\syncatset{Bool} \unify \syncatset{Bool} / \emptyset}
+
+  \inferrule{\tau_1 \unify \tau_2 / \Theta_1 \\ \Theta_1^* \tau_2 \unify \Theta_1^* \tau_2'}
+            {\tau_1 \to \tau_1' \unify \tau_2 \to \tau_2' / \Theta_2 \circ \Theta_1}
+
+  \inferrule{ }
+            {?X \unify ?X / \emptyset}
+
+  \inferrule{?X \not\in \text{fuv}(\tau) }
+            {?X \unify \tau / [?X \mapsto \tau]}
+
+  \inferrule{?X \not\in \text{fuv}(\tau) }
+            {\tau \unify ?X / [?X \mapsto \tau]}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Imperative Representation of Terms}
+
+\begin{verbatim}
+  type tp_view = 
+    | Bool
+    | Arr of tp * tp
+    | UVar of uvar
+  and uvar = tp option ref
+  and tp = tp_view
+
+  let rec view tp = 
+    match tp with
+    | UVar x ->
+      match !x with
+      | None -> tp
+      | Some t -> x := Some (view t); !x
+    | _ -> tp
+
+  let set_uvar u t =
+    (* here we can assert that u is None *)
+    u := Some t
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
