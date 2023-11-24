@@ -64,7 +64,11 @@ Type unification:
     | UVar x ->
       match !x with
       | None -> tp
-      | Some t -> x := Some (view t); !x
+      | Some tp ->
+        let t = view tp in
+        x := Some t;
+        t
+      end
     | _ -> tp
 
   let set_uvar u t =
