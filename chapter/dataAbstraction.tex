@@ -42,6 +42,7 @@ $\Pack{(\Lambda \lambda x \ldotp \lambda y \ldotp \lambda f \ldotp f\;x\;y,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Contextual Equivalence}
+\label{sec:ctx-equiv}
 
 General closing contexts
 
@@ -117,7 +118,7 @@ Similarly to definition of $\Obs$ in \autoref{sec:biorthogonal-closure}:
   If $\Delta; \Gamma \vdash e \;:\; \tau$ then $\Delta; \Gamma \models e \simeq_{log} e \;:\; \tau$.
 \end{theorem}
 
-\begin{theorem}[Soundness]
+\begin{theorem}[Soundness]\label{thm:soundness-bin-log-rel}
   If $\Delta; \Gamma \models e_1 \simeq_{log} e_2 \;:\; \tau$
   then $\Delta; \Gamma \models e_1 \simeq_{ctx} e_2 \;:\; \tau$.
   This can be simply written as $\simeq_{log} \subseteq \simeq_{ctx}$.
@@ -130,6 +131,88 @@ Similarly to definition of $\Obs$ in \autoref{sec:biorthogonal-closure}:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Parametricity and Free Theorems}
+
+Throughout learning functional programming there is this recurring statement
+that there exists only one function of type
+$\forall\alpha\ldotp\alpha\to\alpha$,
+namely identity ($\id = \Lambda\lambda x\ldotp x$).
+To make this statement actually true, we need to make some restrictions about
+out programming language. First of all it needs to be \emph{pure} meaning no
+side effects, because we could write many functions of type
+$\forall\alpha\ldotp\alpha\to\alpha$ like
+$\lambda x\ldotp\texttt{print 'a'};\;x$.
+We also need to restrict out language from operator such as \texttt{call/cc}.
+Another aspect to consider is recursion. When we introduce it there are at
+least three different values of type $\forall\alpha\ldotp\alpha\to\alpha$:
+\begin{itemize}
+  \item $\id$
+  \item $\Lambda \lambda x\ldotp\Omega$
+  \item $\Lambda \ldotp\Omega$.
+\end{itemize}
+Where $\Omega$ is any non-terminating expression, which we should be able
+to produce using recursion. The exact derivation depends on typing rules.
+Those constraints are nearly exactly what we need to make our original
+statement true. There is only one snag. Expression $\lambda x\ldotp \id\; x$
+is not syntactically the same as $\id$. However we intuitively consider those
+expressions to be the same. To formally define it we can use
+contextual equivalence from \autoref{sec:ctx-equiv}. In sum, our original
+statement should state that in a pure System F without recursion with
+respect to contextual equivalence there exists only one value of type
+$\forall\alpha\ldotp\alpha\to\alpha$. We will prove this in a moment,
+but first in order to make this proof possible we need to revise our
+definition of expression closure. One option would be to define it as:
+  \[
+    \mathcal E R= \{ (e_1, e_2) \mid \exists (v_1, v_2) \in R\ldotp
+      e_1 \longrightarrow^* v_1 \wedge e_2 \longrightarrow^* v_2 \}.
+  \]
+
+Before we get to the actual proof, we will show following lemma:
+\begin{lemma}\label{lem:identity}
+  For any values $v,$ $v'$ if $v:\; \forall\alpha\ldotp \alpha \to \alpha$,
+  then there exists value $v''$ such that $v\;* \longrightarrow^* v''$ and
+  $v'' \; v' \longrightarrow^* v'$.
+\end{lemma}
+\begin{proof}
+  Our assumption states that
+    $(v, v) \in \Denot{\forall\alpha\ldotp\alpha\to\alpha}_\eta$.\\
+  Unfolding the definition of denotation we get\\
+  $\forall R\in\semcatset{Type}\ldotp (v\;*, v\;*) \in
+    \mathcal E \Denot{\alpha \to \alpha}_{\eta[\alpha\mapsto R]}$.\\
+  Since we can choose $R$, we will define it as $R = \{(v', v')\}$.\\
+  Following the definition of expression closure we take\\
+  $(v_1, v_2) \in \Denot{\alpha \to \alpha}_{\eta[\alpha \mapsto R]}$
+    such that $v\;* \longrightarrow^* v_1$.\\
+  Unfolding definition of denotation we get
+    $\forall(v_1', v_2')\in R\ldotp (v_1\; v_1', v_2\; v_2')\in\mathcal E R$.\\
+  Setting $v_1' = v_2' = v'$ we get $v_1 \;v' \longrightarrow^* u$.
+    Since $R$ contains only one pair $(v',v')$,\\
+  we get $u=v'$ and
+    $v\;*\; v'\longrightarrow^* v_1\; v' \longrightarrow^* v'$.
+\end{proof}
+
+\begin{theorem}
+  If $v:\; \forall\alpha\ldotp\alpha\to\alpha$, then
+  $v$ and $\Lambda\lambda x\ldotp x$ are contextually equivalent.
+\end{theorem}
+\begin{proof}
+  By \autoref{thm:soundness-bin-log-rel}
+    if suffices to show logical equivalence.\\
+  To show: $(v, \Lambda\lambda x\ldotp x) \in
+    \Denot{\forall\alpha\ldotp\alpha\to\alpha}_\eta$.\\
+  Take any $R \in \semcatset{Type}$;
+    to show: $(v\; *, \Lambda\lambda x\ldotp x\;*) \in
+      \mathcal E\Denot{\alpha\to\alpha}_{\eta[\alpha\mapsto R]}$.\\
+  By \autoref{lem:identity} and
+    $(\Lambda\lambda x\ldotp x)\;* \longrightarrow \lambda x\ldotp x$
+      it suffices to show \\
+  $(v'', \lambda x\ldotp x )\in
+    \Denot{\alpha\to\alpha}_{\eta[\alpha \mapsto R]}$.\\
+  Take any $(v_1, v_2) \in R$;
+    to show: $(v''\; v_1, (\lambda x\ldotp x) v_2) \in \mathcal E R$.\\
+  By assumption about $v''$ and properties of reduction it suffices to show:\\
+  $(v_1, v_2) \in \mathcal E R$,
+    which follows from assumption $(v_1, v_2) \in R$.
+\end{proof}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
