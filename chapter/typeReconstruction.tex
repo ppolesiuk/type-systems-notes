@@ -40,7 +40,7 @@ Type unification:
   \inferrule{ }
             {\syncatset{Bool} \unify \syncatset{Bool} / \emptyset}
 
-  \inferrule{\tau_1 \unify \tau_2 / \theta_1 \\ \theta_1^* \tau_2 \unify \theta_1^* \tau_2'}
+  \inferrule{\tau_1 \unify \tau_2 / \theta_1 \\ \theta_1^* \tau_1' \unify \theta_1^* \tau_2' / \theta_2}
             {\tau_1 \to \tau_1' \unify \tau_2 \to \tau_2' / \theta_2 \circ \theta_1}
 
   \inferrule{ }
