@@ -67,7 +67,7 @@ Type unification:
   let rec view tp = 
     match tp with
     | UVar x ->
-      match !x with
+      begin match !x with
       | None -> tp
       | Some tp ->
         let t = view tp in
