@@ -40,11 +40,55 @@ Value restriction:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Logical Relations for Polymorphism}
+We need to define denotation of universal type.
+One possible definition would be:
+\[
+  \Denot{\forall\alpha\ldotp\tau} = \{ v \mid \forall \tau' \in\syncatset{Type}
+    \ldotp v\;*\in \mathcal E \Denot{\Subst\tau{\tau'}x} \}
+\]
 
+Despite this definition looking promising, there is a severe problem,
+because it is not structural -- type $\Subst\tau{\tau'}x$ could be structurally
+bigger than $\tau$. We can try fixing this and add an environment $\Delta$ and
+a function $\eta\colon\Delta\to\syncatset{Type}$ to remember type $\tau'$.
+This would give us a definition
 \begin{alignat*}{2}
-  \Denot{\forall\alpha.\tau}_{\eta} & = \{ v \mid \forall R \in \semcatset{Type}. v\;* \in \mathcal{E}\Denot{\tau_1}_{\eta[\alpha \mapsto R]} \} \\
+  \Denot{\forall\alpha\ldotp\tau}_{\eta} & = \{ v \mid
+    \forall \tau' \in \syncatset{Type}.
+      v\;* \in \mathcal{E}\Denot{\tau}_{\eta[\alpha \mapsto \tau']} \} \\
+  \Denot{\alpha}_{\eta} & = \Denot{\eta(\alpha)}
+\end{alignat*}
+
+This is close to proper definition, but it still isn't structural.
+Trick that solves this problem is to instead of quantifying over
+syntactic types, to do it over semantic types.
+Therefore, we arrive at the correct definition, which is
+\begin{alignat*}{2}
+  \Denot{\forall\alpha\ldotp\tau}_{\eta} & = \{ v \mid
+    \forall R \in \semcatset{Type}.
+      v\;* \in \mathcal{E}\Denot{\tau}_{\eta[\alpha \mapsto R]} \} \\
   \Denot{\alpha}_{\eta} & = \eta(\alpha)
 \end{alignat*}
+
+For all the other denotations, we simply need to carry $\eta$.
+For example the denotation of arrow would be defined as
+
+\[
+  \Denot{\tau_1 \to \tau_2}_\eta = \{ v \mid
+    \forall v' \in \Denot{\tau_1}_\eta\ldotp
+      v\;v' \in \mathcal{E}\Denot{\tau_2}_\eta \} \\\\
+\]
+Since we added a set $\Delta$ which is an environment for type variables,
+we need to redefine logical relation from \autoref{sec:log-rel}.
+The semantic representation for this type of environment is a function
+$\eta\colon\Delta\to\semcatset{Type}$, that for each type variable returns
+its meaning in terms of semantic types. Therefore, we have
+\[
+  \Delta; \Gamma\models e \;\colon\; \tau \iff
+    \forall \eta\colon\Delta\to\semcatset{Type}\ldotp
+      \forall \gamma\in\Denot\Gamma_\eta\ldotp
+        \gamma^*\;e \in\Denot\tau_\eta
+\]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
