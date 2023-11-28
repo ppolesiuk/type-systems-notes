@@ -48,7 +48,8 @@ $\Gamma, x:\tau \Leftrightarrow \Gamma[x \mapsto \tau]$
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Curry--Howard Isomorphism and Some New Constructs}
 
-Now, let's remove all terms from typing rules above and squint our eyes a little. What do we see? A wild natural deduction appears!
+Now, let's remove all terms from typing rules above and squint our eyes a little. 
+What do we see? A wild natural deduction appears!
 
 \begin{mathpar}
   \inferrule{\tau \in \Gamma}
@@ -61,9 +62,12 @@ Now, let's remove all terms from typing rules above and squint our eyes a little
             {\Gamma\vdash \tau_1}
 
 \end{mathpar}
-Notice that the structure of a term mirrors its type derivation -- whenever we see a lambda-abstraction, we know that an implication was introduced; whenever we see an application, we know that an implication was eliminated.
+Notice that the structure of a term mirrors its type derivation---whenever 
+we see a lambda-abstraction, we know that an implication was introduced; 
+whenever we see an application, we know that an implication was eliminated.
 
-The version of natural deduction that we know from the Logic course also contains rules for other connectives. For instance, we can introduce $\top$ and eliminate $\bot$. 
+The version of natural deduction that we know from the Logic course also contains 
+rules for other connectives. For instance, we can introduce $\top$ and eliminate $\bot$. 
 
 \begin{mathpar}
 \inferrule{ }{\Gamma \vdash \top}
@@ -72,7 +76,18 @@ The version of natural deduction that we know from the Logic course also contain
 	    {\Gamma \vdash \tau}
 \end{mathpar}
 
-Let us try to add top and bottom types to our calculus. The introduction rule of $\top$ means that one can always assert that $\top$ is true. Now, we want to be always able to assert that \textit{something} has type $\top$. This \textit{something} is going to be the \textit{unit} $\langle \rangle$ -- a new value in the grammar of values. What about $\bot$? Having an expression of type $\bot$, we should be able to construct an expression of an arbitrary type. But what does an expression of type $\bot$ represent? Well, its type derivation must be a proof of a contradiction. We know from exprerience that reaching a contradiction may be useful for some greater goal. Once we have proven a contradiction, we usually point it out, saying, ``this is a contradiction''.  For this purpose, we add the \texttt{absurd} syntactical construct to the grammar of expressions. It is not a value, because it is going to signify a failed computation. No reduction rules for it will be provided.
+Let us try to add top and bottom types to our calculus. The introduction rule 
+of $\top$ means that one can always assert that $\top$ is true. Now, we want 
+to be always able to assert that \textit{something} has type $\top$. 
+This \textit{something} is going to be the \textit{unit} $\langle \rangle$---a 
+new value in the grammar of values. What about $\bot$? Having an expression 
+of type $\bot$, we should be able to construct an expression of an arbitrary type. 
+But what does an expression of type $\bot$ represent? Well, its type derivation 
+must be a proof of a contradiction. We know from experience that reaching 
+a contradiction may be useful for some greater goal. Once we have proven 
+a contradiction, we usually point it out, saying, ``this is a contradiction''.  
+For this purpose, we add the \texttt{absurd} syntactical construct to the grammar 
+of expressions. No reduction rules for it will be provided.
 
 \begin{mathpar}
 \inferrule{ }{\Gamma \vdash \langle \rangle : \top}
@@ -81,7 +96,13 @@ Let us try to add top and bottom types to our calculus. The introduction rule of
 	    {\Gamma \vdash \texttt{absurd}\ e : \tau}
 \end{mathpar}
 
-Now consider negation. The introduction of $\neg \tau$ is identical to the introduction of $\tau \rightarrow \bot$. Moreover, the elimination of negation states that from $\tau$ and $\neg \tau$ we can get $\bot$, and indeed we obtain $\bot$ from $\tau$ and $\tau \rightarrow \bot$ by elimination of implication. Therefore we need not worry about negation and may proceed to conjunction and disjunction, for which we have the following inference rules.
+Now consider negation. The introduction of $\neg \tau$ is identical to 
+the introduction of $\tau \rightarrow \bot$. Moreover, the elimination 
+of negation states that from $\tau$ and $\neg \tau$ we can get $\bot$, 
+and indeed we obtain $\bot$ from $\tau$ and $\tau \rightarrow \bot$ 
+by elimination of implication. Therefore we need not worry about negation 
+and may proceed to conjunction and disjunction, for which we have 
+the following inference rules.
 
 \begin{mathpar}
   \inferrule{\Gamma\vdash \tau_1 \\ \Gamma\vdash \tau_2}
@@ -97,7 +118,13 @@ Now consider negation. The introduction of $\neg \tau$ is identical to the intro
             {\Gamma\vdash \tau}
 \end{mathpar}
 
-A term of type $\tau_1 \land \tau_2$ should be a proof that there exists a term of type $\tau_1$ and that there exists a term of type $\tau_2$. The best proof of this is, of course, a pair of such terms. Just like we eliminate a conjunction by choosing one of its conjuncts, we deconstruct a pair by choosing one of its components. This time, we will go away from the notational conventions of propositional calculus and use the symbol $\times$ instead of $\land$ (this makes sense because a conjunction is a ``logical product'').
+A term of type $\tau_1 \land \tau_2$ should be a proof that there exists a term 
+of type $\tau_1$ and that there exists a term of type $\tau_2$. The best proof 
+of this is, of course, a pair of such terms. Just like we eliminate a conjunction 
+by choosing one of its conjuncts, we deconstruct a pair by choosing one 
+of its components. This time, we will go away from the notational conventions 
+of propositional calculus and use the symbol $\times$ instead of $\land$ 
+(this makes sense because a conjunction is a ``logical product'').
 
 \begin{mathpar}
 \inferrule{\Gamma\vdash e_1 : \tau_1 \\ \Gamma\vdash e_2 : \tau_2}
@@ -109,7 +136,12 @@ A term of type $\tau_1 \land \tau_2$ should be a proof that there exists a term 
 \inferrule{ }{\pi_i\;\langle v_1, v_2 \rangle \rightharpoonup v_i} \text{ for } i \in \{1, 2\} 
 \end{mathpar}
 
-As for disjunction, a term of type $\tau_1 \lor \tau_2$ should contain either a $\tau_1$-term or a $\tau_2$-term. This is known as a union type. We use the constructors $\iota_1, \iota_2$ to mark which case we are dealing with. In order to eliminate $\tau_1 \lor \tau_2$, we analyze two cases. Each variant must suffice to obtain some $\tau$-term. We write + instead of $\lor$ (a disjunction is a ``logical sum''). 
+As for disjunction, a term of type $\tau_1 \lor \tau_2$ should contain either 
+a $\tau_1$-term or a $\tau_2$-term. This is known as a union type. We use 
+the constructors $\iota_1, \iota_2$ to mark which case we are dealing with. 
+In order to eliminate $\tau_1 \lor \tau_2$, we analyze two cases. 
+Each variant must suffice to obtain some $\tau$-term. We write + instead of $\lor$ 
+(a disjunction is a ``logical sum''). 
 
 \begin{mathpar}
 \inferrule{\Gamma\vdash e : \tau_i}
@@ -123,7 +155,11 @@ As for disjunction, a term of type $\tau_1 \lor \tau_2$ should contain either a 
 \inferrule{ }{\CaseTerm{\iotaval_i\;v}{e_1}{e_2} \rightharpoonup e_i\{v/x\}}
 \end{mathpar}
 
-For hygiene's sake, we distinguish $\langle v, v \rangle$, the value, from $(e, e)$, the expression. Similarly, we distinguish $\iotaval_i v$ from $\iota_i e$. Formally, it may be a good idea to add separate typing rules for these value-constructs. Expression-constructs reduce to their corresponding value-constructs according to the following rules.
+For hygiene's sake, we distinguish $\langle v, v \rangle$, the value, 
+from $(e, e)$, the expression. Similarly, we distinguish $\iotaval_i v$ 
+from $\iota_i e$. Formally, it may be a good idea to add separate typing rules 
+for these value-constructs. Expression-constructs reduce to their corresponding 
+value-constructs according to the following rules.
 
 \begin{mathpar}
 \inferrule{ }{(v_1, v_2) \rightharpoonup \langle v_1, v_2 \rangle}
@@ -134,15 +170,14 @@ For hygiene's sake, we distinguish $\langle v, v \rangle$, the value, from $(e, 
 Finally, let us look at the resulting grammar of types, expressions, values and evaluation contexts.
 
 \begin{alignat*}{2}
-  \tau & \Coloneqq \ldots \mid \tau\times\tau \mid \tau+\tau
-    \tag{types} \\
-  e & \Coloneqq \ldots \mid (e,e)
+  \tau & \Coloneqq \ldots \mid \top \mid \bot \mid \tau\times\tau \mid \tau+\tau \\
+  e & \Coloneqq \ldots \mid \texttt{absurd}\ e \mid (e,e)
       \mid \pi_1\;e \mid \pi_2\;e
       \mid \iota_1\;e \mid \iota_2\;e \mid \CaseTerm{e}{e}{e}
-    \tag{expressions} \\
-  v & \Coloneqq \ldots \mid \langle v, v \rangle
+    \\
+  v & \Coloneqq \ldots \mid \langle \rangle \mid \langle v, v \rangle
     \mid \iotaval_1\;v \mid \iotaval_2\;v
-    \tag{values} \\
+    \\
 E & \Coloneqq \ldots \mid (E,e) \mid (v,E)
     \mid \pi_1\;E \mid \pi_2\;E
     \mid \iota_1\;E \mid \iota_2\;E 
