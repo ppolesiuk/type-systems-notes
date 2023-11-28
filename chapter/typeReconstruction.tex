@@ -20,7 +20,7 @@ Inference rules:
   \inferrule{\Gamma, x : \UVarX \vdash e \Uparrow \tau_2 / \theta}
             {\Gamma\vdash \lambda x.e \Uparrow \theta^*(\UVarX) \to \tau_2 / \theta}
 
-  \inferrule{\Gamma\vdash e_1 \Uparrow \tau_2 \to \tau_1 / \theta_1 \\ \Gamma\vdash e_2 \Downarrow \tau_2 / \theta_2}
+  \inferrule{\Gamma\vdash e_1 \Uparrow \tau_2 \to \tau_1 / \theta_1 \\ \theta_1^* \Gamma\vdash e_2 \Downarrow \tau_2 / \theta_2}
             {\Gamma\vdash e_1\;e_2 \Uparrow \tau_1 / \theta_2 \circ \theta_1}
 
   \\\\
