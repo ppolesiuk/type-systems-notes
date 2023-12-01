@@ -3,6 +3,7 @@
 \newcommand\UVarX{?\!X}
 \newcommand\UVarY{?\!Y}
 \newcommand\UVarZ{?\!Z}
+\newcommand\UVarR{?\!R}
 \newcommand\unify{\stackrel{?}{=}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,6 +87,87 @@ Type unification:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Records and Row-Polymorphism}
+
+\begin{alignat*}{2}
+  \tau   & \Coloneqq \alpha \mid \tau \to \tau \mid \{\rho\} \mid \UVarX \\
+  \sigma & \Coloneqq \forall\alpha\ldotp\sigma \mid \forall\alpha^R\ldotp\sigma \mid \tau \\
+  \rho   & \Coloneqq \cdot \mid l : \tau, \rho \mid \UVarR \mid \alpha^R \\
+  e      & \Coloneqq \ldots \mid e.l \mid \{ l = e, \ldots, l = e \} \\
+  v      & \Coloneqq \ldots \mid \{ l = v, \ldots, l = v \}^v \\
+  E      & \Coloneqq \ldots \mid E.l \mid
+    \{ l_1 = v_1, \ldots, l_{i-1} = v_{i-1}, l_i = E, l_{i+1} = e_{i+1}, \ldots, l_n = e_n \}
+\end{alignat*}
+
+Typng rules for record types:
+
+\begin{mathpar}
+  \inferrule{\Delta; \Gamma \vdash e : \{ l_1 : \tau_1, \ldots, l_n : \tau_n \}}
+            {\Delta; \Gamma \vdash e.l_i : \tau_i}
+
+  \inferrule{\Delta; \Gamma \vdash e_1 : \tau_1 \\ \ldots \\ \Delta; \Gamma \vdash e_n : \tau_n}
+            {\Delta; \Gamma \vdash \{ l_1 = e_1, \ldots, l_n = e_n \} : \{ l_1 : \tau_1, \ldots, l_n : \tau_n \}}
+
+  \inferrule{\Delta; \Gamma \vdash e : \tau \\ \tau \equiv \tau'}
+            {\Delta; \Gamma \vdash e : \tau'}
+
+\end{mathpar}
+
+Congruence rules for types:
+
+\begin{mathpar}
+  \inferrule{ }
+            {\tau \equiv \tau}
+
+  \inferrule{\tau_1 \equiv \tau_1' \\ \tau_2 \equiv \tau_2'}
+            {\tau_1 \to \tau_2 \equiv \tau_1' \to \tau_2'}
+
+  \inferrule{l_1 \not= l_2}
+            {l_1 : \tau_1, l_2 : \tau_2, \rho \equiv l_2 : \tau_2, l_1 : \tau_1, \rho}
+
+  \\\\
+
+  \inferrule{ }
+            {\cdot \equiv \cdot}
+
+  \inferrule{\rho_1 \equiv \rho_2}
+            {\{\rho_1\} \equiv \{\rho_2\}}
+
+  \inferrule{\tau_1 \equiv \tau_2 \\ \rho_1 \equiv \rho_2}
+            {l : \tau_1, \rho_1 \equiv l : \tau_2, \rho_2}
+\end{mathpar}
+
+Inference rules:
+
+\begin{mathpar}
+  \inferrule{\Delta; \Gamma \vdash e \Uparrow \{\rho\} \\
+             \rho \setminus (l :\;\UVarY) \leadsto \rho' / \theta'}
+            {\Delta; \Gamma \vdash e.l \Uparrow \theta^*(\UVarY) / \theta'\circ\theta}
+
+  \inferrule{\rho \setminus (l_2 : \tau_2) \leadsto \rho' \\ l_1 \not= l_2}
+            {l_1 : \tau_1, \rho \setminus (l_2 : \tau_2) \leadsto (l_1 : \theta^*\tau_1), \rho' / \theta}
+
+  \inferrule{ }
+            {\UVarR \setminus (l : \tau) \leadsto \UVarR' / [\UVarR \mapsto l : \tau, \UVarR']}
+
+  \inferrule{\tau_1 \unify \tau_2 / \theta}
+            {l : \tau_1 \setminus (l : \tau_2) \leadsto \theta^*\rho / \theta}
+\end{mathpar}
+
+Unification rules:
+
+\begin{mathpar}
+  \inferrule{ }
+            {\UVarR \unify \UVarR}
+          
+  \inferrule{\UVarR \not\in \text{fuv}(\rho)}
+            {\UVarR \unify \rho / [\UVarR \mapsto \rho]}
+
+  \inferrule{ }
+            {\cdot \unify \cdot}
+            
+  \inferrule{\rho' \setminus (l : \tau) \leadsto \rho'' \\ \theta^*\rho \unify \rho'' / \theta'}
+            {l : \tau, \rho \unify \rho' / \theta'\circ\theta}
+\end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
