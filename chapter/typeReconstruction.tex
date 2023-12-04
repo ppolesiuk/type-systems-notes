@@ -98,7 +98,7 @@ Type unification:
     \{ l_1 = v_1, \ldots, l_{i-1} = v_{i-1}, l_i = E, l_{i+1} = e_{i+1}, \ldots, l_n = e_n \}
 \end{alignat*}
 
-Typng rules for record types:
+Typing rules for record types:
 
 \begin{mathpar}
   \inferrule{\Delta; \Gamma \vdash e : \{ l_1 : \tau_1, \ldots, l_n : \tau_n \}}
@@ -139,18 +139,18 @@ Congruence rules for types:
 Inference rules:
 
 \begin{mathpar}
-  \inferrule{\Delta; \Gamma \vdash e \Uparrow \{\rho\} \\
+  \inferrule{\Delta; \Gamma \vdash e \Uparrow \{\rho\} / \theta \\
              \rho \setminus (l :\;\UVarY) \leadsto \rho' / \theta'}
             {\Delta; \Gamma \vdash e.l \Uparrow \theta^*(\UVarY) / \theta'\circ\theta}
 
-  \inferrule{\rho \setminus (l_2 : \tau_2) \leadsto \rho' \\ l_1 \not= l_2}
+  \inferrule{\rho \setminus (l_2 : \tau_2) \leadsto \rho' / \theta \\ l_1 \not= l_2}
             {l_1 : \tau_1, \rho \setminus (l_2 : \tau_2) \leadsto (l_1 : \theta^*\tau_1), \rho' / \theta}
 
   \inferrule{ }
             {\UVarR \setminus (l : \tau) \leadsto \UVarR' / [\UVarR \mapsto l : \tau, \UVarR']}
 
   \inferrule{\tau_1 \unify \tau_2 / \theta}
-            {l : \tau_1 \setminus (l : \tau_2) \leadsto \theta^*\rho / \theta}
+            {l : \tau_1, \rho \setminus (l : \tau_2) \leadsto \theta^*\rho / \theta}
 \end{mathpar}
 
 Unification rules:
