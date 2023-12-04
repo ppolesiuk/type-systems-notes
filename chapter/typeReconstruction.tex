@@ -58,14 +58,14 @@ Type unification:
 \section{Imperative Representation of Terms}
 
 \begin{verbatim}
-  type tp_view = 
+  type tp_view =
     | Bool
     | Arr of tp * tp
     | UVar of uvar
   and uvar = tp option ref
   and tp = tp_view
 
-  let rec view tp = 
+  let rec view tp =
     match tp with
     | UVar x ->
       begin match !x with
@@ -84,6 +84,39 @@ Type unification:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{ML-Polymorphism}
+
+\newcommand\Let[3]{\texttt{let}\;#1 = #2\;\texttt{in}\;#3}
+\newcommand\FUVars[1]{\mathrm{fuv}(#1)}
+
+
+\begin{alignat*}{2}
+  \tau   & \Coloneqq \alpha \mid \tau \to \tau \mid \UVarX \mid \dots \\
+  \sigma & \Coloneqq \forall\alpha\ldotp\sigma \mid \tau
+\end{alignat*}
+
+\[
+  \{\alpha_1, \dots, \alpha_n\} = \FVars\tau \setminus \FVars\Gamma
+\]
+
+\begin{mathpar}
+  \inferrule{\Gamma \vdash e_1 \colon \tau \\
+               \Gamma, x \colon \forall\alpha_1, \dots, \alpha_n \ldotp \tau
+                 \vdash e_2 \colon \tau'}
+            {\Gamma \vdash \Let{x}{e_1}{e_2} \colon \tau'}
+
+\end{mathpar}
+
+\begin{mathpar}
+  \inferrule{\Gamma \vdash e_1 \Uparrow \tau/\theta \\
+               \theta^*\Gamma, x\colon\forall\alpha_1, \dots, \alpha_n \ldotp
+                 \tau \{ \alpha_1/\UVarX_1, \dots, \alpha_n/\UVarX_n\}
+                 \vdash e_2 \Uparrow \tau'/\theta'}
+            {\Gamma \vdash \Let{x}{e_1}{e_2} \Uparrow \tau'/\theta'\circ\theta}
+
+  \text{where } \{\UVarX_1, \dots, \UVarX_n\}
+    = \FUVars{\tau}\setminus\FUVars{\theta^*\Gamma}
+
+\end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Records and Row-Polymorphism}
@@ -158,13 +191,13 @@ Unification rules:
 \begin{mathpar}
   \inferrule{ }
             {\UVarR \unify \UVarR}
-          
+
   \inferrule{\UVarR \not\in \text{fuv}(\rho)}
             {\UVarR \unify \rho / [\UVarR \mapsto \rho]}
 
   \inferrule{ }
             {\cdot \unify \cdot}
-            
+
   \inferrule{\rho' \setminus (l : \tau) \leadsto \rho'' \\ \theta^*\rho \unify \rho'' / \theta'}
             {l : \tau, \rho \unify \rho' / \theta'\circ\theta}
 \end{mathpar}
