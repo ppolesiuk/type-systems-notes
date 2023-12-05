@@ -5,6 +5,7 @@
 \newcommand\UVarZ{?\!Z}
 \newcommand\UVarR{?\!R}
 \newcommand\unify{\stackrel{?}{=}}
+\newcommand\FUVars[1]{\mathrm{fuv}(#1)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Simple Types}
@@ -47,10 +48,10 @@ Type unification:
   \inferrule{ }
             {\UVarX \unify \UVarX / \emptyset}
 
-  \inferrule{\UVarX \not\in \text{fuv}(\tau) }
+  \inferrule{\UVarX \not\in \FUVars{\tau}}
             {\UVarX \unify \tau / [\UVarX \mapsto \tau]}
 
-  \inferrule{\UVarX \not\in \text{fuv}(\tau) }
+  \inferrule{\UVarX \not\in \FUVars{\tau}}
             {\tau \unify \UVarX / [\UVarX \mapsto \tau]}
 \end{mathpar}
 
@@ -86,7 +87,6 @@ Type unification:
 \section{ML-Polymorphism}
 
 \newcommand\Let[3]{\texttt{let}\;#1 = #2\;\texttt{in}\;#3}
-\newcommand\FUVars[1]{\mathrm{fuv}(#1)}
 
 Seeing how easily we've defined type reconstruction for simple types,
 one may want to go further and attempt type reconstruction for System-F.
@@ -266,7 +266,7 @@ Unification rules:
   \inferrule{ }
             {\UVarR \unify \UVarR}
 
-  \inferrule{\UVarR \not\in \text{fuv}(\rho)}
+  \inferrule{\UVarR \not\in \FUVars{\rho}}
             {\UVarR \unify \rho / [\UVarR \mapsto \rho]}
 
   \inferrule{ }
