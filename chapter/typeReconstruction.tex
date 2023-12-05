@@ -88,11 +88,79 @@ Type unification:
 \newcommand\Let[3]{\texttt{let}\;#1 = #2\;\texttt{in}\;#3}
 \newcommand\FUVars[1]{\mathrm{fuv}(#1)}
 
+Seeing how easily we've defined type reconstruction for simple types,
+one may want to go further and attempt type reconstruction for System-F.
+However let's recall inference rule for type application and answer important question,
+how does one substitute for unification variable?
+
+\begin{mathpar}
+  \inferrule{\Delta;\Gamma\vdash e : \forall\alpha\ldotp\tau}
+            {\Delta;\Gamma\vdash e\;* : \tau\{\tau'/\alpha\}}
+\end{mathpar}
+
+For example how would we approach this unification:
+
+\begin{mathpar}
+  \UVarX\{\tau/\alpha\} \unify \tau_1\to\tau_2
+\end{mathpar}
+
+Seems like we have two options. We can create two new variables $\UVarY$, $\UVarZ$
+and substitution $[\UVarX \mapsto \UVarY \to \UVarZ]$ or assume that $\UVarX = \alpha$.
+That gives us two new paths to consider of which neither is a clear favourite.
+
+\begin{mathpar}
+	\UVarY\{\tau/\alpha\}\unify\tau_1\text{ and }
+	\UVarZ\{\tau/\alpha\}\unify\tau_2\and
+	\tau \unify \tau_1 \to\tau_2
+\end{mathpar}
+
+This along with other unclear difficulties results in this problem exploding
+and ultimately makes it undecidable.
+
+So let's backtrack. Problem started with substitution of unification variable.
+What if we can ensure that $\alpha$ never occurs in $\UVarX$, then $\UVarX\{\tau/\alpha\}=\UVarX$.
+First instead of polymorphic types we will use type schemes with monomorphic types:
 
 \begin{alignat*}{2}
-  \tau   & \Coloneqq \alpha \mid \tau \to \tau \mid \UVarX \mid \dots \\
+  \tau   & \Coloneqq \alpha \mid \tau \to \tau \mid \UVarX \mid \dots
+    \tag{types} \\
   \sigma & \Coloneqq \forall\alpha\ldotp\sigma \mid \tau
+    \tag{type schemes}
 \end{alignat*}
+
+Then inference rules:
+
+\begin{mathpar}
+  % variable
+	\inferrule{(x : \forall \alpha_1\ldots\alpha_n\ldotp \tau) \in \Gamma}
+	  {\Gamma\vdash x \Uparrow
+    	\tau\{\UVarX_1/\alpha_1,\ldots,\UVarX_n/\alpha_n\} /
+    	\varnothing}
+
+  % lambda
+  \inferrule{\Gamma, x : \UVarX \vdash e \Uparrow \tau_2 / \theta}
+            {\Gamma\vdash \lambda x.e \Uparrow \theta^*(\UVarX) \to \tau_2 / \theta}
+
+  % application - arrow
+  \inferrule{\Gamma\vdash e_1 \Uparrow \tau_2 \to \tau_1 / \theta_1 \\ \theta_1^* \Gamma\vdash e_2 \Downarrow \tau_2 / \theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \tau_1 / \theta_2 \circ \theta_1}
+
+  \\\\
+  
+  % application - unification variable
+  \inferrule{\Gamma\vdash e_1 \Uparrow \UVarX / \theta_1 \\ \theta_1'^*\Gamma\vdash e_2 \Downarrow \UVarY / \theta_2}
+            {\Gamma\vdash e_1\;e_2 \Uparrow \theta_2^*(\UVarZ) / \theta_2 \circ \theta_1'}
+
+  \text{where }\theta_1' = \theta_1[\UVarX \mapsto \UVarY \to \UVarZ]
+
+  % top-down to bottom-up
+  \inferrule{\Gamma\vdash e \Uparrow \tau' / \theta \\ \theta^*\tau \unify \tau' / \theta'}
+            {\Gamma\vdash e \Downarrow \tau / \theta' \circ \theta}
+
+  \\\\
+\end{mathpar}
+
+Let rule (declarative):
 
 \[
   \{\alpha_1, \dots, \alpha_n\} = \FVars\tau \setminus \FVars\Gamma
@@ -106,6 +174,8 @@ Type unification:
 
 \end{mathpar}
 
+Let rule (algorithmic):
+
 \begin{mathpar}
   \inferrule{\Gamma \vdash e_1 \Uparrow \tau/\theta \\
                \theta^*\Gamma, x\colon\forall\alpha_1, \dots, \alpha_n \ldotp
@@ -115,8 +185,12 @@ Type unification:
 
   \text{where } \{\UVarX_1, \dots, \UVarX_n\}
     = \FUVars{\tau}\setminus\FUVars{\theta^*\Gamma}
-
 \end{mathpar}
+
+Now, since every unification variable that is being substituted was created in $e_1$,
+if it remained unknown it is truely a free variable so can be polymorphic,
+and every unification variable that is not being substituted cannot contain $\alpha$,
+since at the time of it's creation, $\alpha$ wasn't in the scope,therefore $\UVarX\{\tau/\alpha\}=\UVarX$ remains true.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Records and Row-Polymorphism}
