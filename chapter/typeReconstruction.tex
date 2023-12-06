@@ -253,7 +253,7 @@ Inference rules:
   \inferrule{\rho \setminus (l_2 : \tau_2) \leadsto \rho' / \theta \\ l_1 \not= l_2}
             {l_1 : \tau_1, \rho \setminus (l_2 : \tau_2) \leadsto (l_1 : \theta^*\tau_1), \rho' / \theta}
 
-  \inferrule{ }
+  \inferrule{\UVarR \not\in \FUVars{\tau}}
             {\UVarR \setminus (l : \tau) \leadsto \UVarR' / [\UVarR \mapsto l : \tau, \UVarR']}
 
   \inferrule{\tau_1 \unify \tau_2 / \theta}
