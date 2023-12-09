@@ -3,8 +3,68 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Iso-recursive Types}
 
+\newcommand\Fold[1]{\texttt{fold}\;#1}
+\newcommand\Unfold[1]{\texttt{unfold}\;#1}
+
+\newcommand\Foldv[1]{\texttt{fold}^\textsc{v}\;#1}
+
+\[
+  \tau \Coloneqq \cdots\mid \mu\alpha\ldotp\tau
+\]
+
+\begin{mathpar}
+  \mu\alpha\ldotp\tau\and
+  \Subst \tau {\mu\alpha\ldotp\tau} \alpha
+\end{mathpar}
+
+\begin{alignat*}{2}
+  e & \Coloneqq \cdots\mid\Fold e \mid \Unfold e\\
+  v & \Coloneqq \cdots\mid\Foldv v
+\end{alignat*}
+
+\begin{alignat*}{2}
+  \Fold v             & \longrightarrow \Foldv v \\
+  \Unfold{(\Foldv v)} & \longrightarrow v
+\end{alignat*}
+
+
+\begin{mathpar}
+  \inferrule{\Gamma \vdash e \colon \Subst \tau {\mu\alpha\ldotp\tau} \alpha}
+            {\Gamma\vdash \Fold e \colon \mu\alpha\ldotp\tau}
+
+  \inferrule{\Gamma\vdash e \colon \mu\alpha\ldotp\tau}
+            {\Gamma \vdash \Unfold e \colon
+              \Subst \tau {\mu\alpha\ldotp\tau} \alpha}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Local Type Declarations}
+
+\newcommand\FoldDec[2]{\texttt{fold}_#1\;#2}
+\newcommand\UnfoldDec[2]{\texttt{unfold}_#1\;#2}
+\newcommand\TypeDec[2]{\texttt{type}\;#1\;\texttt{in}\;#2}
+
+\begin{alignat*}{2}
+  \tau   & \Coloneqq \alpha\mid\tau\to\tau\mid\cdots \\
+  e      & \Coloneqq \cdots\mid\TypeDec\alpha e
+             \mid\FoldDec\alpha e \mid\UnfoldDec \alpha e \\
+  \Delta & \Coloneqq \cdot\mid\Delta, \alpha \mid \Delta, \alpha = \tau
+\end{alignat*}
+
+
+\begin{mathpar}
+  \inferrule{\Delta, \alpha = \tau'; \Gamma \vdash e \colon \tau \\\
+             \alpha \not\in \FVars\tau}
+             {\Delta; \Gamma \vdash \TypeDec\alpha e \colon \tau}
+
+  \inferrule{\Delta; \Gamma \vdash e \colon \tau \\\
+             (\alpha =\tau)\in \Delta}
+             {\Delta; \Gamma \vdash \FoldDec\alpha e \colon \alpha}
+
+  \inferrule{\Delta; \Gamma \vdash e \colon \alpha \\\
+             (\alpha =\tau)\in \Delta}
+             {\Delta; \Gamma \vdash \UnfoldDec\alpha e \colon \tau}
+\end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type Reconstruction}
