@@ -72,5 +72,75 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Equi-recursive Types}
 
+\newcommand\UnfoldRel{\leadsto}
+
+An another approach to recursive types is called equi-recursive types.
+In this approach we treat types $\mu\alpha\ldotp\tau$
+and $\Subst \tau {\mu\alpha\ldotp\tau} \alpha$ equal
+($\mu\alpha\ldotp\tau \equiv \Subst \tau {\mu\alpha\ldotp\tau} \alpha$)
+and we add the following conversion rule to the system.
+\begin{mathpar}
+  \inferrule{\Gamma \vdash e \;:\; \tau
+        \and \tau \equiv \tau'}
+            {\Gamma \vdash e \;:\; \tau'}
+\end{mathpar}
+
+The type equivalence might be defined as the smallest congruence
+containing the rule
+\begin{mathpar}
+  \inferrule{}
+    {\mu\alpha\ldotp\tau \equiv \Subst \tau {\mu\alpha\ldotp\tau} \alpha}
+    \textrm{.}
+\end{mathpar}
+Although such defined type system is sound,
+the equivalence relation is too fine-grained making it impractical
+and hard to implement.
+Consider the type
+$\tau = \mu\alpha\ldotp \textsf{Int}\to\textsf{Int}\to\alpha$.
+It is a type of functions, that accepts any number of integer values
+and greedily ask for more.
+From practical point of view,
+type $\tau$ should be equivalent to $\textsf{Int} \to \tau$,
+but they cannot be equated using inductively defined congruence:
+each unfolding of recursive types in $\tau$ gives even number of arrows,
+while the number of arrows in $\textsf{Int} \to \tau$ always remain odd.
+
+We define type equivalence as the most coarse-grained relation
+that do not relate types that can be differentiated by finite amount of time.
+To be more precise, we define it using the notion of \emph{bisimulation}.
+Similarly to process calculi and labelled transitions systems we start
+with identifying \emph{silent transitions}, which in our case will
+be unfolding of a recursive type on a head position.
+\begin{mathpar}
+  \inferrule{}
+    {\mu\alpha\ldotp\tau \UnfoldRel
+      \Subst \tau {\mu\alpha\ldotp\tau} \alpha}
+\end{mathpar}
+If we treat taking of some type component (\emph{e.g.}, left-hand-side
+of an arrow) as some non-silent transitions,
+we can define a bisimilarity of types.
+The specialized definition would be the following.
+
+\begin{defin}
+  A binary relation $\mathcal{R}$ on types is called $\emph{simulation}$
+  if for each $\tau_1\mathrel{\mathcal{R}} \tau_2$ we have the following:
+  \begin{thmenumerate}
+  \item if $\tau_1 \UnfoldRel \tau_1'$ then
+    $\tau_2 \UnfoldRel^* \tau_2'$
+    for some $\tau_2'$
+    such that $\tau_1' \mathrel{\mathcal{R}} \tau_2'$;
+  \item if $\tau_1$ is of the form $\tau_1' \to \tau_1''$
+    then $\tau_2 \UnfoldRel^* \tau_2' \to \tau_2''$
+    for some $\tau_2'$ and $\tau_2''$
+    such that $\tau_1' \mathrel{\mathcal{R}} \tau_2'$
+    and $\tau_1'' \mathrel{\mathcal{R}} \tau_2''$;
+  \item \ldots (analogous clauses for other type constructs).
+  \end{thmenumerate}
+  A relation $\mathcal{R}$ is called \emph{bisimulation}
+  if $\mathcal{R}$ and $\mathcal{R}^{-1}$ are simulations.
+  A \emph{bisimilarity} (denoted as $\equiv$ or $\simeq$)
+  is the largest bisimiulation.
+\end{defin}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
