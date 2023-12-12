@@ -1,3 +1,5 @@
+\usetikzlibrary{arrows.meta}
+
 \chapter{Recursive Types}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,14 +48,17 @@ but syntactically they are different.
 In this chapter we treat them as isomorphic and define two operations that
 convert one to the other.
 
-% ascii art placeholder, this should be done using tikz
-\begin{gather*}
-\texttt{fold} \\
-\rm{<----------------} \\
-\mu\alpha\ldotp\tau \hspace{150pt} \Subst \tau {\mu\alpha\ldotp\tau} \alpha\\
-\rm{---------------->} \\
-\texttt{unfold}
-\end{gather*}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto, scale=0.7]
+        \node (1) at (-2, 0) {$\mu \alpha \ldotp \tau$};
+        \node (2) at (2, 0) {$\tau \{\mu \alpha \ldotp \tau / \alpha\}$};
+
+        \draw [->, -{Stealth[length=3mm, width=2mm]}] (1) to [out=90, in=90] node {unfold} (2);
+        \draw [->, -{Stealth[length=3mm, width=2mm]}] (2) to [out=270, in=270] node {fold} (1);
+    \end{tikzpicture}
+    \caption{"Isomorphism" between iso-recursive types}
+\end{figure}
 
 With this addition we need to extend a grammar of expressions and values.
 
