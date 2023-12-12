@@ -8,19 +8,61 @@
 
 \newcommand\Foldv[1]{\texttt{fold}^\textsc{v}\;#1}
 
+Let's take a look at a common data type used in functional programming,
+namely lists. They consist of two constructs---nil and cons.
+Following those constructs we can try writing a type of lists containing
+elements of type $\tau$:
+
+\[
+  \texttt{List}\; \tau = \texttt{unit} + (\tau \times \texttt{List}\; \tau)
+\]
+
+Writing this type out makes our problem evident---type $\texttt{List}\; \tau$
+is present on the right side of this equation.
+To solve this problem we need to extend our type system by adding
+\emph{recursive types}. We do this by adding a sort of fix construct in
+which a variable $\alpha$ is a type of the whole expression and can be used
+inside $\tau$.
+
 \[
   \tau \Coloneqq \cdots\mid \mu\alpha\ldotp\tau
 \]
+
+According to this definition, we can write our original type of lists as:
+
+\[
+  \texttt{List}\; \tau =\mu\alpha\ldotp\texttt{unit} + (\tau \times \alpha)
+\]
+
+We should consider a relation between those two types:
 
 \begin{mathpar}
   \mu\alpha\ldotp\tau\and
   \Subst \tau {\mu\alpha\ldotp\tau} \alpha
 \end{mathpar}
 
+Thinking of them semantically they should be equal,
+but syntactically they are different.
+In this chapter we treat them as isomorphic and define two operations that
+convert one to the other.
+
+% ascii art placeholder, this should be done using tikz
+\begin{gather*}
+\texttt{fold} \\
+\rm{<----------------} \\
+\mu\alpha\ldotp\tau \hspace{150pt} \Subst \tau {\mu\alpha\ldotp\tau} \alpha\\
+\rm{---------------->} \\
+\texttt{unfold}
+\end{gather*}
+
+With this addition we need to extend a grammar of expressions and values.
+
 \begin{alignat*}{2}
   e & \Coloneqq \cdots\mid\Fold e \mid \Unfold e\\
   v & \Coloneqq \cdots\mid\Foldv v
 \end{alignat*}
+
+Together with some reduction and typing rules.
 
 \begin{alignat*}{2}
   \Fold v             & \longrightarrow \Foldv v \\
@@ -36,6 +78,11 @@
             {\Gamma \vdash \Unfold e \colon
               \Subst \tau {\mu\alpha\ldotp\tau} \alpha}
 \end{mathpar}
+
+We should note that we added a $\Fold e$ as a value instead of $\Unfold e$,
+because the former gives a $\mu\alpha\ldotp\tau$
+which can't really evaluate further, but the latter can.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Local Type Declarations}
