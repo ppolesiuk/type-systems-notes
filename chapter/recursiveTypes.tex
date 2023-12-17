@@ -197,5 +197,40 @@ The specialized definition would be the following.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Efficient Unification Algorithm}
 
+\begin{verbatim}
+  module UF : sig
+    type 'a t
+    val create : 'a -> 'a t
+    val find : 'a t -> 'a
+    val equal : 'a t -> 'a t -> bool
+    val union : ('a -> 'a -> 'a) -> 'a t -> 'a t -> unit
+  end = struct
+    type 'a t = 'a node ref
+    and 'a node =
+      | Root of 'a
+      | Node of 'a t
+    (* ... *)
+  end
+  
+  type tp = tpconstr UF.t
+  and tpconstr =
+    | UVar
+    | Arr of tp * tp
+    | Unit
+
+  let rec unify t1 t2 =
+    if UF.equal t1 t2 then ()
+    else UF.union unify_tconstr t1 t2
+  and unify_tconstr t1 t2 =
+    match (t1, t2) with
+    | UVar, t | t, UVar -> t
+    | Arr(ta1, tb1), Arr(ta2, tb2) ->
+      unify ta1 ta2;
+      unify tb1 tb2;
+      t1
+    | Unit, Unit -> Unit
+    | Arr(_,_), Unit | Unit, Arr(_,_) -> failwith "cannot unify unit and function"
+\end{verbatim}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
