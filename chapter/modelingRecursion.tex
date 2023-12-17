@@ -3,8 +3,61 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Kripke Semantics of Intuitionistic Logic}
 
+\[
+  (W, \sqsubseteq) - \text{preorder}
+\]
+
+\[
+  \sigma \colon \Var \to W \to \{\mathsf{T}, \mathsf{F}\}
+\]
+
+Valuation $\sigma$ should be monotonic.
+
+\begin{alignat*}{2}
+  \sigma, w \models p & \iff \sigma(p)(w) = \mathsf{T} \\
+  \sigma, w \models \varphi \wedge \psi & \iff
+    \sigma, w \models \varphi \text{ and }\sigma, w \models \psi \\
+  \sigma, w \models \top & \iff \text{always} \\
+  \sigma, w \models \bot & \iff \text{never} \\
+  \sigma, w \models \varphi \longrightarrow \psi & \iff
+    \forall w'\sqsupseteq w \ldotp
+      \sigma, w' \models \varphi \implies \sigma, w' \models \psi \\
+\end{alignat*}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Step-indexed Kripke Models}
+\newcommand\Index[1]{|#1|}
+\newcommand\Later{\triangleright}
+
+\[
+  (W, \sqsubseteq, \Index{\cdot})
+\]
+
+\[
+  \Index{\cdot}\colon W \to \mathbb N
+\]
+
+$\Index{\cdot}$ should be monotonic, meaning
+$\forall w \sqsupseteq w'\ldotp  \Index{w} \leq \Index{w'}$.
+
+\[
+  \varphi \Coloneqq \cdots \mid \Later \varphi
+\]
+
+\[
+  \sigma, w \models \Later \varphi \iff
+    \forall w' \sqsupseteq w\ldotp
+      \Index{w'} + 1 \leq \Index{w} \implies \sigma, w' \models \varphi
+\]
+
+\begin{mathpar}
+  \inferrule{\Sigma, \Gamma \vdash \varphi}
+            {\triangleright \Sigma, \Gamma \vdash \Later \varphi}
+
+  \inferrule{\Gamma, \Later \varphi \vdash \varphi}
+            {\Gamma \vdash \varphi}
+\end{mathpar}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
