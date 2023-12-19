@@ -1,8 +1,37 @@
 \chapter{Parametric Polymorphism}
+A lot of useful lambda-abstractions can assume many different types.
+The term $\lambda x . x$ provably has types $\top \rightarrow \top$, 
+$(\top + \top) \rightarrow (\top + \top)$, $(\texttt{bool} \times \texttt{int}) \rightarrow (\texttt{bool} \times \texttt{int})$,
+etc. Indeed, $\lambda x. x$ has type $\tau \rightarrow \tau$ for any $\tau \in \syncatset{Type}$.
+Similarly,
+\begin{itemize}
+\item $\lambda f. \lambda x. f (f x)$ has type $(\tau \rightarrow \tau) \rightarrow \tau \rightarrow \tau$ for all $\tau \in \syncatset{Type}$,
+\item $\lambda f. \lambda g. \lambda x. f (g x)$ has type 
+$(\tau_1 \rightarrow \tau_2) \rightarrow (\tau_3 \rightarrow \tau_1) \rightarrow \tau_3 \rightarrow \tau_2$ 
+for all $\tau_1$, $\tau_2$, $\tau_3$~$\in \syncatset{Type}$,
+\item $\lambda f. \lambda x. \lambda y. f y x$ has type 
+$(\tau_1 \rightarrow \tau_2 \rightarrow \tau_3) \rightarrow \tau_2 \rightarrow \tau_1 \rightarrow \tau_3$ 
+for all $\tau_1$, $\tau_2$, $\tau_3$~$\in \syncatset{Type}$.
+\end{itemize}
+When placed in a specific context, these expressions will be assigned their
+appropriate concrete types by the simple typing relation. However, let us not
+forget how much programmers like to name things. It would be really convenient
+to write a let-expression
+\[ \texttt{let flip} = \lambda f. \lambda x. \lambda y. f y x \texttt{ in } \ldots \]
+and then use \texttt{flip} on inputs of various types further in the program. 
+Remembering that let-expressions are desugared into applications, we notice that 
+in the type derivation of
+\[ (\lambda \texttt{flip}. \ldots) (\lambda f. \lambda x. \lambda y. f y x) \]
+the right hand side's type will be derived only once! Perhaps the simplest
+example illustrating this problem is as follows: the expression $(\lambda x . x)(\lambda x . x)$
+is well-typed, but $(\lambda \texttt{id}. \texttt{id id}) (\lambda x . x)$ is not,
+as it requires deriving the type of a self-application.
 
+We now introduce a calculus called System F, the goal of which is to incorporate
+statements like ``\texttt{id} has type $\tau \rightarrow \tau$ for all $\tau$'' 
+into the type system.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{System F}
-
 
 \begin{alignat*}{2}
   \syncatset{Type} & \ni \tau && \Coloneqq
@@ -12,7 +41,15 @@
   \syncatset{Value} & \ni v && \Coloneqq
     \lambda x.e \mid x \mid \Lambda e \tag{values}
 \end{alignat*}
+The grammar of types is extended with the universal quantifier and type variables,
+which are stored in a new environment $\Delta$. Types that appear in the usual
+environment $\Gamma$ may contain type variables from $\Delta$. The grammar of expressions
+now includes an instantiation operator. Another addition is the value-forming
+capital lambda.
 
+According to the typing rules below, capital lambda precedes expressions
+whose type is to be generalized. Such a type can in turn be instantiated 
+to a desired concrete form by means of the $*$ operator.
 \begin{mathpar}
   \inferrule{\Delta,\alpha;\Gamma\vdash e : \tau}
             {\Delta;\Gamma\vdash \Lambda e : \forall\alpha.\tau}
@@ -21,8 +58,11 @@
             {\Delta;\Gamma\vdash e\;* : \tau\{\tau'/\alpha\}}
 \end{mathpar}
 
-Implicit alternative:
-
+This is not entirely what we are used to in practice. A programmer usually
+does not want to keep track of generalizing and instantiating types---especially
+not in the very syntax. Our goal was to just write a function and have the type
+system understand that it is general enough to be used on various inputs. We
+therefore consider the following alternative, implicit typing rules.
 \begin{mathpar}
   \inferrule{\Delta,\alpha;\Gamma\vdash e : \tau}
             {\Delta;\Gamma\vdash e : \forall\alpha.\tau}
@@ -31,13 +71,17 @@ Implicit alternative:
             {\Delta;\Gamma\vdash e : \tau\{\tau'/\alpha\}}
 \end{mathpar}
 
-Value restriction:
-
+Unfortunately, with these rules, some problems arise once we add features
+like mutable state or \texttt{call/cc} to our language. We can get rid of these problems
+by restricting the generalization of types to types of values only. This is known
+as the \textit{value restriction}.
 \begin{mathpar}
   \inferrule{\Delta,\alpha;\Gamma\vdash v : \tau}
             {\Delta;\Gamma\vdash v : \forall\alpha.\tau}
 \end{mathpar}
 
+Returning to the explicit version of System F, it is now easy to check that
+$(\lambda \texttt{id}. \texttt{id}*\texttt{id}) (\Lambda \lambda x. x)$ is well-typed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Logical Relations for Polymorphism}
 We need to define denotation of universal type.
