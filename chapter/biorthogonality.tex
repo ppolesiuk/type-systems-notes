@@ -29,10 +29,106 @@ termination.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Type System for \texttt{call/cc}}
 
+In this chapter we extend our simple lambda calculus from
+\autoref{ch:simple-types} with \texttt{call/cc} operator
+\[
+  \mathcal{K} k\ldotp e
+\]
+that lets us formazlize the behaviour of throwing and catching an exception.
+Because we now differentiate between whole programs and subexpressions
+we need to define a new grammar for the language.
+\begin{alignat*}{2}
+  \syncatset{Expr} & \ni e && \Coloneqq v \mid e\;e \mid \texttt{absurd}\;e
+    \mid \mathcal{K} x\ldotp e \mid \mathcal{A}p
+    \tag{expressions} \\
+  \syncatset{Prog} & \ni p && \Coloneqq e
+    \tag{programs} \\
+  \syncatset{Val} & \ni v && \Coloneqq x \mid \lambda x.e \mid c_b
+    \tag{values} \\
+  \syncatset{Ectx} & \ni E && \Coloneqq \square \mid E \; e \mid v \; E
+    \tag{evaluation contexts}
+\end{alignat*}
+and we extend $\syncatset{Type}$ with $\bot$ constant.
+Besides the \texttt{call/cc} operator we added two more language constructs
+\begin{itemize}
+  \item $\texttt{absurd}$, that is just a regular $\bot$-elimination
+    function
+  \item $\mathcal{A}p$ (\textit{abort}), which replaces currently evaluated
+    program with $p$ - its is required by operational semantics and it
+    should never be used in hand-written programs
+\end{itemize}
+
+We can think of evaluation contexts as of "functions" transforming
+expressions into whole programs, i.e. "$E : e \rightarrow p$". To make this
+intuition formal we define \textit{plug} operation in obvious way.
+What the reader should keep in mind is that the hole in an evaluation context
+is supposed to be at the very position where the evaluation happens.
+It is alseo worth to notice that evaluation contexts cannot contain
+\texttt{call/cc} or \texttt{abort}. This enforces the correct order of
+computation where the whole \texttt{call/cc} (or \texttt{abort}) expression
+is always evaluated before any of its subexpressions.
+
+We define following reduction rules
+\begin{alignat*}{2}
+  E[(\lambda x.e)\;v] & \longrightarrow E[e\{v / x\}] \\
+  E[\mathcal{K} x.e]  & \longrightarrow E[e\{\lambda y.\mathcal{A} E[y] / x\}] \\
+  E[\mathcal{A} p]    & \longrightarrow p
+\end{alignat*}
+First rule is standard. Third rule defines behaviour of \texttt{abort}
+like it was described above - whole evaluation context is replaced by $p$.
+Second rule describes \texttt{call/cc}. It says that when we evaluate this
+construct it turns into just the expression it wrapped, but with all
+occurrences of the bound variable replaced by a function, which, applied
+to any value and evaluated, reverts the state of the computation to
+the point where we started computing related \texttt{call/cc} and
+resumes from that point assuming the given argument as the result.
+This behaviour is analogous to what we experience from \texttt{try-catch}
+blocks - the bound variable $x$ in $\mathcal{K} x.e$ corresponds to a function
+\texttt{raise} or \texttt{throw} that interrupts computation and raises
+a specialized exception (with a single parameter) that is only caught by
+the specialized block (i.e. the one binding $x$ - $x$ acts here as a kind
+of exception type). The only difference is that in regular programming
+languages we also have a special exception-handling block, while here
+computation is immediately resumed with the thrown value, but it is just
+a technical detail that can be easily overcome.
+
+Let us see an example program with \texttt{call/cc}.
+\begin{alignat*}{2}
+  \mathcal{K} \textit{zero} \ldotp \texttt{List.fold\_left}\;(\lambda & p\;x\ldotp \\
+  & \textbf{if} \; x = 0 \; \textbf{then} \; \textit{zero}\;0 \\
+  & \textbf{else} \; p*x)
+\end{alignat*}
+This expression, in a context where it is applied to a list, takes a list
+and computes to a product of its elements. In case all of them are nonzero
+it just performs a fold, but if one of them is zero this expression takes
+a shortcut by immediately reducing to $0$.
+
+Now, when we understand the meaning of \texttt{call/cc}, we can derive a typing
+rule for it. There are two obvious observations: first, the type of the whole
+construct should be the type of the expression it wraps, and second, the variable
+$x$ bound by \texttt{call/cc} should be a function accepting values of this
+type as arguments. By an analogy to \texttt{raise} we want to be able to put
+$(x\;\textit{someparameter})$ everywhere, but we do not want to add polymorphism
+to our system. Here is where the $\bot$ type comes in handy as it can be
+converted to any type by the \texttt{absurd} rule.
+\begin{mathpar}
+    \inferrule{\Gamma\vdash e : \bot}
+              {\Gamma\vdash \texttt{absurd}\;e : \tau}
+\end{mathpar}
+That is why our rule has the following shape:
 \begin{mathpar}
     \inferrule{\Gamma,x : (\tau \to \bot) \vdash e : \tau}
               {\Gamma\vdash \mathcal{K} x.e : \tau}
 \end{mathpar}
+As a final remark let us notice that, after erasing terms (and defining $\neg\tau$
+as a syntactic sugar for $\tau\rightarrow\bot$), the rule turns to
+\begin{mathpar}
+    \inferrule{\Gamma, \neg\tau \vdash \tau}
+              {\Gamma\vdash \tau}
+\end{mathpar}
+and that is exactly Pierce's law. This means that if we extend our lambda
+calculus with products, sums and $\top$ (i.e. \texttt{unit}) we can
+encode classical logic, natural deduction proofs as $\lambda$-terms.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Biorthogonal Closure}
@@ -92,3 +188,4 @@ Termination: $\Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
+
