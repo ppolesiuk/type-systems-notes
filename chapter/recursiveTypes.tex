@@ -197,6 +197,45 @@ The specialized definition would be the following.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Efficient Unification Algorithm}
 
+Let's view types as trees with additional backward edges
+inserted to model recursion.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[auto, scale=0.7]
+        \node (1) at (-2, 0) {$\mu \alpha \ldotp$};
+        \node (2) at (-2, -2) {$\to$};
+        \node (3) at (-3, -4) {$\textsf{Int}$};
+        \node (4) at (-1, -4) {$\to$};
+        \node (5) at (-2, -6) {$\textsf{Int}$};
+        \node (6) at (0, -6) {$\alpha$};
+
+        \node[align=center] (8) at (3, -2) {$\to$\\{\footnotesize $(\alpha)$}};
+        \node (9) at (2, -4) {$\textsf{Int}$};
+        \node (10) at (4, -4) {$\to$};
+        \node (11) at (3, -6) {$\textsf{Int}$};
+
+        \draw [->] (1) to [] node {} (2);
+        \draw [->] (2) to [] node {} (3);
+        \draw [->] (2) to [] node {} (4);
+        \draw [->] (4) to [] node {} (5);
+        \draw [->] (4) to [] node {} (6);
+
+        \draw [->] (8) to [] node {} (9);
+        \draw [->] (8) to [] node {} (10);
+        \draw [->] (10) to [] node {} (11);
+        \draw [->] (10) to [out=300, in=340] node {} (8);
+    \end{tikzpicture}
+    \caption{Type $\mu\alpha\ldotp \textsf{Int}\to\textsf{Int}\to\alpha$ as a tree
+    with explicit recursive type variables (left) and backward edges (right).}
+\end{figure}
+
+To efficiently unify two recursive types, we will maintain
+a partition of the nodes from both trees into disjoint sets.
+Subsequently, we will merge some of these sets so that,
+in the end, they represent the equivalence classes of $\simeq$.
+This will be achieved using an Union-Find module with the following signature.
+
 \begin{verbatim}
   module UF : sig
     type 'a t
@@ -211,13 +250,21 @@ The specialized definition would be the following.
       | Node of 'a t
     (* ... *)
   end
-  
+\end{verbatim}
+
+Now we can represent the trees with backward edges as
+
+\begin{verbatim}
   type tp = tpconstr UF.t
   and tpconstr =
     | UVar
     | Arr of tp * tp
     | Unit
+\end{verbatim}
 
+and implement the \texttt{unify} function.
+
+\begin{verbatim}
   let rec unify t1 t2 =
     if UF.equal t1 t2 then ()
     else UF.union unify_tconstr t1 t2
