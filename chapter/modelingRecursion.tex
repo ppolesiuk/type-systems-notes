@@ -67,5 +67,25 @@ $\forall w \sqsupseteq w'\ldotp  \Index{w} \leq \Index{w'}$.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{A Relational Model of Recursive Types}
 
+Denotation of recursive types:
+\[
+  \Denot{\mu\alpha.\tau} = \{\texttt{fold}\;v \mid v \in\triangleright\Denot{\tau\{\mu\alpha.\tau/\alpha\}} \}
+\]
+
+or, alternatively:
+\[
+  \Denot{\mu\alpha.\tau}_{\eta} = \{\texttt{fold}\;v \mid v \in\triangleright\Denot{\tau}_{\eta[\alpha\mapsto \mu\alpha.\tau]} \}
+\]
+
+\[
+  \Obs = \{ e \mid (\exists v.e=v) \lor \exists e' \in\triangleright\Obs \ldotp e \longrightarrow e' \}
+\]
+
+While those definitions use the thing being defined on right-hand side, all those recursive occurences are under $\triangleright$.
+Therefore we may treat those as recursive predicates defined using fixed-point combinator: 
+
+\[
+  \Obs = \mu(\lambda \Obs. \{ e \mid (\exists v.e=v) \lor \exists e' \in\triangleright\Obs \ldotp e \longrightarrow e' \})
+\]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
