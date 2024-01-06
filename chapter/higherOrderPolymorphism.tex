@@ -3,14 +3,87 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{System F$_\omega$}
 
+\begin{alignat*}{2}
+  \syncatset{Kind} & \ni \kappa && \Coloneqq * \mid \kappa \to \kappa \\
+  \syncatset{Type} & \ni \tau   && \Coloneqq \alpha \mid \tau \to \tau \mid
+    \forall\alpha^\kappa.\tau \mid \tau\;\tau \mid \lambda\alpha^\kappa.\tau \mid \dots \\
+  \syncatset{Expr} & \ni e      && \Coloneqq v \mid e\;e \mid e\;* \\
+  \syncatset{Value} & \ni v     && \Coloneqq x \mid \lambda x.e \mid \Lambda e
+\end{alignat*}
+
+Alternative type formulation (with explicit kinds):
+\begin{alignat*}{2}
+  \tau^k & \Coloneqq \alpha^\kappa \mid \tau^{\kappa'\to\kappa}\;\tau^{\kappa'} \\
+  \tau^* & \Coloneqq \dots \mid \tau^* \to \tau^* \mid \forall\alpha^\kappa.\tau^* \\
+  \tau^{\kappa_1\to\kappa_2} & \Coloneqq \dots \mid \lambda\alpha^{\kappa_1}.\tau^{\kappa_2}
+\end{alignat*}
+
+Kind system:
+\begin{mathpar}
+  \inferrule{(\alpha :: \kappa) \in \Delta}
+            {\Delta \vdash \alpha :: \kappa}
+
+  \inferrule{\Gamma, \alpha :: \kappa_1 \vdash \tau :: \kappa_2}
+            {\Gamma \vdash \lambda\alpha^{\kappa_1}.\tau :: \kappa_1 \to \kappa_2}
+
+  \inferrule{\Gamma \vdash \tau_2 :: \kappa_1 \to \kappa_2 \\ \Gamma \vdash \tau_1 :: \kappa_1}
+            {\Gamma \vdash \tau_2\;\tau_1 :: \kappa_2}
+
+  \inferrule{\Gamma \vdash \tau_1 :: * \\ \Gamma \vdash \tau_2 :: *}
+            {\Gamma \vdash \tau_1 \to \tau_2 :: *}
+
+  \inferrule{\Gamma, \alpha :: \kappa \vdash \tau :: *}
+            {\Gamma \vdash \forall\alpha^\kappa.\tau :: *}
+\end{mathpar}
+
+Type system:
+\begin{mathpar}
+  \inferrule{\Gamma;\Delta, x:\tau_1 \vdash e : \tau_2 \\ \Gamma \vdash \tau_1 :: *}
+            {\Gamma;\Delta \vdash \lambda x.e : \tau_1 \to \tau_2}
+
+  \inferrule{\Gamma;\Delta \vdash e : \forall\alpha^\kappa.\tau \\ \Delta \vdash \tau' :: \kappa}
+            {\Gamma;\Delta \vdash e\;* : \tau\{\tau'/\alpha\}}
+
+  \inferrule{\Gamma;\Delta \vdash e : \tau \\ \Gamma \vdash \tau \equiv \tau'}
+            {\Gamma;\Delta \vdash e : \tau}
+
+  \dots
+\end{mathpar}
+
+$\Gamma \vdash \cdot \equiv \cdot$ is the smallest congruence containing the rule
+\begin{mathpar}
+  \inferrule{\Gamma \vdash \tau' :: \kappa}
+            {\Gamma \vdash (\lambda\alpha^\kappa.\tau)\tau' \equiv \tau\{\tau'/\alpha\}}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Problems with Type Reconstruction}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Relational Model}
 
+\begin{alignat*}{2}
+  \Denot{*} & = \mathcal{P}(\syncatset{Value}_{\varnothing}) \\
+  \Denot{\kappa_1\to\kappa_2} & = \Denot{\kappa_2}^{\Denot{\kappa_1}} \\
+  \Denot{\Delta} & = \Pi(\alpha::\kappa)\in\Delta. \Denot{\kappa} \\
+  \Denot{\alpha^{\kappa}}_\eta & = \eta(\alpha) \\
+  \Denot{\tau_1^{\kappa_1\to\kappa_2}\to\tau_2^{\kappa_1}}_\eta & = \Denot{\tau_1}_\eta \Denot{\tau_2}_\eta
+\end{alignat*}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Iso-recursive Types of Higher Kinds}
+
+\[
+  \tau \Coloneqq \dots \mid \mu\alpha^\kappa.\tau
+\]
+
+\begin{mathpar}
+  \inferrule{\Gamma, \alpha :: \kappa \vdash \tau :: \kappa}
+            {\Gamma \vdash \mu\alpha^\kappa.\tau :: \kappa}
+\end{mathpar}
+
+List $= \lambda\alpha^*.\mu\beta.1+\alpha\times\beta$\\
+NList $= \mu\beta^{*\to*}.\lambda\alpha^*. 1 + \beta(\alpha \times \alpha) + \alpha \times \beta(\alpha \times \alpha)$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
