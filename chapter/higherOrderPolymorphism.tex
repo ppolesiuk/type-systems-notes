@@ -1,7 +1,16 @@
 \chapter{Higher Order Polymorphism}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{System F$_\omega$}
+\section{System F\texorpdfstring{$_\omega$}{omega}}
+
+We would like to add a new feature to our calculi: type functions, known as type operators.
+These operators will enable us to use convenient type aliases and recursive type constructors
+like $\text{List}$, which, for each type $T$, returns a type of list containing elements of type $T$.
+At the level of types, we add lambda abstraction and application. This addition creates
+possibility to write meaningless types like $(Unit\; Unit)$, so we create a type system
+for types, called kinds, which is basically a copy of simply typed lambda calculus.
+As we can write the same type in different ways, like $Nat$ and $(Id\; Nat)$, we establish
+an equivalence relation on types.
 
 \begin{alignat*}{2}
   \syncatset{Kind} & \ni \kappa && \Coloneqq * \mid \kappa \to \kappa \\
@@ -23,37 +32,41 @@ Kind system:
   \inferrule{(\alpha :: \kappa) \in \Delta}
             {\Delta \vdash \alpha :: \kappa}
 
-  \inferrule{\Gamma, \alpha :: \kappa_1 \vdash \tau :: \kappa_2}
-            {\Gamma \vdash \lambda\alpha^{\kappa_1}.\tau :: \kappa_1 \to \kappa_2}
+  \inferrule{\Delta, \alpha :: \kappa_1 \vdash \tau :: \kappa_2}
+            {\Delta \vdash \lambda\alpha^{\kappa_1}.\tau :: \kappa_1 \to \kappa_2}
 
-  \inferrule{\Gamma \vdash \tau_2 :: \kappa_1 \to \kappa_2 \\ \Gamma \vdash \tau_1 :: \kappa_1}
-            {\Gamma \vdash \tau_2\;\tau_1 :: \kappa_2}
+  \inferrule{\Delta \vdash \tau_2 :: \kappa_1 \to \kappa_2 \\ \Delta \vdash \tau_1 :: \kappa_1}
+            {\Delta \vdash \tau_2\;\tau_1 :: \kappa_2}
 
-  \inferrule{\Gamma \vdash \tau_1 :: * \\ \Gamma \vdash \tau_2 :: *}
-            {\Gamma \vdash \tau_1 \to \tau_2 :: *}
+  \inferrule{\Delta \vdash \tau_1 :: * \\ \Delta \vdash \tau_2 :: *}
+            {\Delta \vdash \tau_1 \to \tau_2 :: *}
 
-  \inferrule{\Gamma, \alpha :: \kappa \vdash \tau :: *}
-            {\Gamma \vdash \forall\alpha^\kappa.\tau :: *}
+  \inferrule{\Delta, \alpha :: \kappa \vdash \tau :: *}
+            {\Delta \vdash \forall\alpha^\kappa.\tau :: *}
 \end{mathpar}
 
 Type system:
 \begin{mathpar}
-  \inferrule{\Gamma;\Delta, x:\tau_1 \vdash e : \tau_2 \\ \Gamma \vdash \tau_1 :: *}
+  \inferrule{\Gamma, x:\tau_1;\Delta \vdash e : \tau_2 \\ \Gamma \vdash \tau_1 :: *}
             {\Gamma;\Delta \vdash \lambda x.e : \tau_1 \to \tau_2}
 
   \inferrule{\Gamma;\Delta \vdash e : \forall\alpha^\kappa.\tau \\ \Delta \vdash \tau' :: \kappa}
             {\Gamma;\Delta \vdash e\;* : \tau\{\tau'/\alpha\}}
 
-  \inferrule{\Gamma;\Delta \vdash e : \tau \\ \Gamma \vdash \tau \equiv \tau'}
-            {\Gamma;\Delta \vdash e : \tau}
+  \inferrule{\Gamma;\Delta \vdash e : \tau \\ \Delta \vdash \tau \equiv \tau'}
+            {\Gamma;\Delta \vdash e : \tau'}
 
-  \dots
+  \inferrule{\Gamma;\Delta, \alpha::\kappa \vdash e : \tau}
+            {\Gamma;\Delta \vdash \Lambda e : \forall \alpha^\kappa\ldotp \tau}
+
+  \inferrule{(x : \tau) \in \Gamma}
+            {\Gamma;\Delta \vdash x : \tau}
 \end{mathpar}
 
-$\Gamma \vdash \cdot \equiv \cdot$ is the smallest congruence containing the rule
+$\Delta \vdash \cdot \equiv \cdot$ is the smallest congruence containing the rule
 \begin{mathpar}
-  \inferrule{\Gamma \vdash \tau' :: \kappa}
-            {\Gamma \vdash (\lambda\alpha^\kappa.\tau)\tau' \equiv \tau\{\tau'/\alpha\}}
+  \inferrule{\Delta \vdash \tau' :: \kappa}
+            {\Delta \vdash (\lambda\alpha^\kappa.\tau)\tau' \equiv \tau\{\tau'/\alpha\}}
 \end{mathpar}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,7 +80,15 @@ $\Gamma \vdash \cdot \equiv \cdot$ is the smallest congruence containing the rul
   \Denot{\kappa_1\to\kappa_2} & = \Denot{\kappa_2}^{\Denot{\kappa_1}} \\
   \Denot{\Delta} & = \Pi(\alpha::\kappa)\in\Delta. \Denot{\kappa} \\
   \Denot{\alpha^{\kappa}}_\eta & = \eta(\alpha) \\
-  \Denot{\tau_1^{\kappa_1\to\kappa_2}\to\tau_2^{\kappa_1}}_\eta & = \Denot{\tau_1}_\eta \Denot{\tau_2}_\eta
+  \Denot{\tau_1 \to \tau_2}_\eta &=
+    \{ v \mid \forall v' \in \Denot{\tau_1}_\eta\ldotp v\;v' \in \mathcal{E}\Denot{\tau_2}_\eta \} \\
+  \Denot{\forall \alpha^\kappa \ldotp \tau}_{\eta} &= 
+    \{ v \mid \forall R \in \Denot{\kappa}_\eta \ldotp
+    v\;* \in \mathcal{E}\Denot{\tau}_{\eta[\alpha \mapsto R]} \} \\
+  \Denot{\tau_1^{\kappa_1 \to \kappa_2} \tau_2^{\kappa_1}}_\eta & =
+    \Denot{\tau_1}_\eta \Denot{\tau_2}_\eta \\
+  \Denot{\lambda \alpha^ \kappa \ldotp \tau }_\eta &=
+    \lambda R \in \Denot{\kappa}_\eta \ldotp \Denot{\tau}_{\eta[\alpha \mapsto R]}
 \end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
