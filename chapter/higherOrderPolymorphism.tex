@@ -53,7 +53,7 @@ Type system:
   \inferrule{\Gamma;\Delta \vdash e : \forall\alpha^\kappa.\tau \\ \Delta \vdash \tau' :: \kappa}
             {\Gamma;\Delta \vdash e\;* : \tau\{\tau'/\alpha\}}
 
-  \inferrule{\Gamma;\Delta \vdash e : \tau \\ \Gamma \vdash \tau \equiv \tau'}
+  \inferrule{\Gamma;\Delta \vdash e : \tau \\ \Delta \vdash \tau \equiv \tau'}
             {\Gamma;\Delta \vdash e : \tau'}
 
   \inferrule{\Gamma;\Delta, \alpha::\kappa \vdash e : \tau}
