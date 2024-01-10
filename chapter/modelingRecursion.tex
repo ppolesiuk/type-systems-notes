@@ -3,15 +3,38 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Kripke Semantics of Intuitionistic Logic}
 
-\[
-  (W, \sqsubseteq) - \text{preorder}
-\]
+In this section we will build a model in which
+we can interpret intuitionistic logic.
+Core idea standing behind this construction is that
+truthfulness of formulas can only propagate to future worlds.
+In other words things can become true as time moves on,
+but not the other way around---if something is true it cannot become false.
+This isn't the case in classical logic in which
+we can assert that something is true and only later realize that we were wrong.
+
+To capture this idea we can introduce a set $W$ of all worlds and
+a relation $\sqsubseteq$ which will say
+if a world is a future version of another one.
+We need to ensure that $\sqsubseteq$ is a preorder meaning
+its reflexive and transitive.
+
+Similarly to classical logic we define valuation $\sigma$,
+but in this case it also takes a world $w$ as it's argument.
 
 \[
-  \sigma \colon \Var \to W \to \{\mathsf{T}, \mathsf{F}\}
+  \sigma \colon \Var \to W \to \{\mathsf{T}, \mathsf{F}\}\footnote{
+    Instead of using $\{\mathsf{T}, \mathsf{F}\}$
+    we could use any Heyting algebra.
+  }
 \]
 
-Valuation $\sigma$ should be monotonic.
+In order to prevent true formulas from becoming false,
+we need to ensure that for any $p\in\Var$
+valuation $\sigma(p)$ is monotonic with respect to $\sqsubseteq$.
+
+Now given valuation $\sigma$ and world $w$ we can define
+when they \emph{satisfy} a formula $\varphi$
+(denoted $\sigma, w \models \varphi$):
 
 \begin{alignat*}{2}
   \sigma, w \models p & \iff \sigma(p)(w) = \mathsf{T} \\
@@ -82,7 +105,7 @@ or, alternatively:
 \]
 
 While those definitions use the thing being defined on right-hand side, all those recursive occurences are under $\triangleright$.
-Therefore we may treat those as recursive predicates defined using fixed-point combinator: 
+Therefore we may treat those as recursive predicates defined using fixed-point combinator:
 
 \[
   \Obs = \mu(\lambda \Obs. \{ e \mid (\exists v.e=v) \lor \exists e' \in\triangleright\Obs \ldotp e \longrightarrow e' \})
