@@ -52,26 +52,36 @@ when they \emph{satisfy} a formula $\varphi$
 \newcommand\Index[1]{|#1|}
 \newcommand\Later{\triangleright}
 
-\[
-  (W, \sqsubseteq, \Index{\cdot})
-\]
-
-\[
-  \Index{\cdot}\colon W \to \mathbb N
-\]
-
-$\Index{\cdot}$ should be monotonic, meaning
+If we were to run our programms,
+we would observe them for a finite amout of time.
+Doing a step of calculation can be thought of as moving to a future world.
+Formally we can define a function $\Index{\cdot}\colon W \to \mathbb N$,
+which will say how much time we have left.
+It should be monotonic, meaning
 $\forall w \sqsupseteq w'\ldotp  \Index{w} \leq \Index{w'}$.
+We should also note that we do not require $\Index{\cdot}$
+to be strictly decreasing.
 
+We add another construction to our grammar of formulas called \emph{later}
+that will represent doing one step of calculation
 \[
   \varphi \Coloneqq \cdots \mid \Later \varphi
 \]
+If we have less time, things should become more true,
+so formula $\Later\varphi$ will be more true than $\varphi$
+as we will be looking at it for one unit of time less.
 
+Following this we define when $\sigma$ and $w$ satisfy $\Later\varphi$
+making sure that we actually do a step of calculation.
 \[
   \sigma, w \models \Later \varphi \iff
     \forall w' \sqsupseteq w\ldotp
       \Index{w'} + 1 \leq \Index{w} \implies \sigma, w' \models \varphi
 \]
+
+Having introduced $\Later$ we can add two inference rules---$\Later$-intro and
+L\"ob induction.
+Proving that they are sound is left as an excersise to the reader.
 
 \begin{mathpar}
   \inferrule{\Sigma, \Gamma \vdash \varphi}
