@@ -3,8 +3,68 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Subtyping}
 
+Subtyping rules:
+
+\begin{mathpar}
+  \inferrule{ }
+            {\tau <: \tau}
+
+  \inferrule{\tau_1 <: \tau_2 \\ \tau_2 <: \tau_3}
+            {\tau_2 <: \tau_3}
+
+  \inferrule{ }
+            {\bot <: \tau}
+
+  \inferrule{ }
+            {\tau <: \top}
+
+  \inferrule{\tau_1' <: \tau_1 \\ \tau_2 <: \tau_2'}
+            {\tau_1 \to \tau_2 <: \tau_1' \to \tau_2'}
+
+  \inferrule{\tau_1 <: \tau_1' \\ \tau_2 <: \tau_2'}
+            {\tau_1 \times \tau_2 <: \tau_1' \times \tau_2'}
+\end{mathpar}
+
+New typing rule (subsumption):
+
+\begin{mathpar}
+  \inferrule{\Gamma \vdash e : \tau_1 \\ \tau_1 <: \tau_2}
+            {\Gamma \vdash e : \tau_2}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Algorithmic Subtyping}
+
+\begin{mathpar}
+  \inferrule{(x : \tau) \in \Gamma}
+            {\Gamma \vdash x \Uparrow \tau}
+
+  \inferrule{\Gamma, x : \tau_1 \vdash e \Uparrow \tau_2}
+            {\Gamma \vdash \lambda x : \tau_1 . e \Uparrow \tau_1 \to \tau_2}
+
+  \inferrule{\Gamma \vdash e_1 \Uparrow \tau_2 \to \tau_1 \\ \Gamma \vdash e_2 \Downarrow \tau_2}
+            {\Gamma \vdash e_1\;e_2 \Uparrow \tau_1}
+
+  \inferrule{\Gamma \vdash e_1 \Uparrow \bot \\ \Gamma \vdash e_2 \Uparrow \tau}
+            {\Gamma \vdash e_1\;e_2 \Uparrow \bot}
+
+  \inferrule{\Gamma, x : \tau_1 \vdash e \Downarrow \tau_2}
+            {\Gamma \vdash \lambda x.e \Downarrow \tau_1 \to \tau_2}
+
+  \inferrule{\Gamma \vdash e \Uparrow \tau' \\ \tau' <: \tau}
+            {\Gamma \vdash e \Downarrow \tau}
+
+  \inferrule{\Gamma \vdash e_1 \Downarrow \texttt{Bool} \\ \Gamma \vdash e_2 \Uparrow \tau_2 \\ \Gamma \vdash e_3 \Uparrow \tau_3}
+            {\Gamma \vdash \texttt{if}\;e_1\;\texttt{then}\;e_2\;\texttt{else}\;e_3 \Uparrow \tau_2 \sqcup \tau_3}
+\end{mathpar}
+
+\begin{alignat*}{2}
+  \bot \sqcup \tau & = \tau \\
+  \top \sqcup \tau & = \top \\
+  (\tau_1 \times \tau_2) \sqcup (\tau_1' \times \tau_2') & = (\tau_1 \sqcup \tau_1') \times (\tau_2 \sqcup \tau_2') \\
+  (\tau_1 \to \tau_2) \sqcup (\tau_1' \to \tau_2') & = (\tau_1 \sqcap \tau_1') \to (\tau_2 \sqcup \tau_2') \\
+  (\tau_1 \times \tau_2) \sqcup (\tau_1' \to \tau_2') & = \top
+\end{alignat*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Coercion Semantics}
