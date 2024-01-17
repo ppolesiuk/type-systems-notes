@@ -69,11 +69,86 @@ New typing rule (subsumption):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Coercion Semantics}
 
+Language with explicit coercions:
+
+\begin{alignat*}{2}
+  e & \Coloneqq \dots \mid c\;e \\
+  v & \Coloneqq \dots \mid \langle c_1 \to c_2 \rangle\;v \\
+  c & \Coloneqq c \to c \mid \bot \mid id \mid \top \mid c_{int}^{float} \mid c \circ c
+\end{alignat*}
+
+Every coercion $c$ corresponds to one of the subtyping rules:
+
+\begin{mathpar}
+  \inferrule{ }
+            {id : \tau <: \tau}
+
+  \inferrule{c_1 : \tau_1 <: \tau_2 \\ c_2 : \tau_2 <: \tau_3}
+            {c_1 \circ c_2 : \tau_2 <: \tau_3}
+
+  \inferrule{ }
+            {\bot : \bot <: \tau}
+
+  \inferrule{ }
+            {\top : \tau <: \top}
+
+  \inferrule{c_1 : \tau_1' <: \tau_1 \\ c_2 : \tau_2 <: \tau_2'}
+            {c_1 \to c_2 : \tau_1 \to \tau_2 <: \tau_1' \to \tau_2'}
+
+  \inferrule{ }
+            {c_{int}^{float} : int <: float}
+\end{mathpar}
+
+Reduction semantics:
+
+\begin{alignat*}{2}
+  id\;v & \rightharpoonup v \\
+  (c_1 \circ c_2)\;v & \rightharpoonup c_1 (c_2\;v) \\
+  \top v & \rightharpoonup \langle\rangle \\
+  (c_1 \to c_2)\;v & \rightharpoonup \langle c_1 \to c_2 \rangle\;v \\
+  \langle c_1 \to c_2 \rangle\;v_1\;v_2 & \rightharpoonup c_2 (v_1 (c_1\;v_2))
+\end{alignat*}
+
+Translation from calculus with subtyping to calculus with explicit coercions:
+
+\begin{mathpar}
+  \inferrule{\Gamma, x : \tau_1 \vdash e : \tau_2 \rightsquigarrow e'}
+            {\Gamma \vdash \lambda x.e : \tau_1 \to \tau_2 \rightsquigarrow \lambda x.e'}
+
+  \inferrule{\Gamma \vdash e : \tau_1 \rightsquigarrow e' \\ \tau_1 <: \tau_2 \rightsquigarrow c}
+            {\Gamma \vdash e : \tau_2 \rightsquigarrow c\;e'}
+\end{mathpar}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Coherence and Interlanguage Logical Relations}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Polymorphism and Bounded Quantification}
+
+\[
+  \tau \Coloneqq \dots \mid \forall\alpha <: \tau.\tau
+\]
+
+Typing rules:
+
+\begin{mathpar}
+  \inferrule{\Delta, \alpha <: \tau_1; \Gamma \vdash e : \tau_2}
+            {\Delta; \Gamma \vdash \Lambda e : \forall\alpha <: \tau_1.\tau_2}
+
+  \inferrule{\Delta; \Gamma \vdash e : \forall\alpha <: \tau_1.\tau_2 \\ \Delta \vdash \tau <:\tau_1\{\tau/\alpha\}}
+            {\Delta; \Gamma \vdash e\;* : \tau_2\{\tau/\alpha\}}
+\end{mathpar}
+
+Subtyping rules:
+
+\begin{mathpar}
+  \inferrule{(\alpha <: \tau) \in \Delta}
+            {\Delta \vdash \alpha <: \tau}
+
+  \inferrule{\Delta, \alpha <: \tau_1' \vdash \tau_1' <: \tau_1 \\ \Delta, \alpha <: \tau_1' \vdash \tau_2 <: \tau_2'}
+            {\Delta \vdash \forall\alpha <: \tau_1.\tau_2 <: \forall\alpha <: \tau_1'.\tau_2'}
+\end{mathpar}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
