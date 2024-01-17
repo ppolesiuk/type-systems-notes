@@ -134,15 +134,47 @@ encode classical logic, natural deduction proofs as $\lambda$-terms.
 \section{Biorthogonal Closure}
 \label{sec:biorthogonal-closure}
 
+Now we would like to prove that our type system is safe and that every typable
+term terminates. In previous chapter we have learned a method of logical relations
+and seen that they provide a clearer and more scalable approach. It is natural
+to ask whether it is possible to use that approach in our current situation.
+The answer is yes, if only we modify the expression closure operator. The problem
+is, it does not make sense to speak of reductions of arbitrary expressions in our
+system. The reduction relation is defined only for whole programs. Therefore, to
+be able to express properties of expressions in the language of reductions we need
+to transform them to programs. We will notice the natural solution if we recall
+our observation from the previous section: evaluation contexts are exactly those
+kind of ”functions” that transform expressions into programs.
 
-$\mathcal{E}R = \{ e \mid \forall E \in \mathcal{K} R. E[e] \in \Obs \}$
+Actually, because the properties we want to observe in our expressions are about
+programs, we will extract their statements into a new relation $\Obs$ on programs
+that, in the proof of safety, will equal $\rawSafe$ and in the proof of
+termination will equal $\{ p \mid \exists v. p \longrightarrow^* v\}$. Most of
+the time we will treat $\Obs$ as a parameter, though, assuming only that if
+$p \longrightarrow p'$ and $p' \in \Obs$ then $p \in \Obs$.
 
-$\mathcal{K}R = \{ E \mid \forall v \in R. E[v] \in \Obs \}$
+We already know that the $\mathcal{E}$ operator should select those expressions $e$,
+for which $E[e] \in \Obs$. The question is, where to take $E$ from. On one hand,
+it should not be too specific, so that properties of $E[e]$ were reflecting
+properties of $e$, but on the other hand we should allow only contexts that
+create correct (i.e. safe/terminating) programs. The solution is to introduce
+another closure operator, this time for contexts: $\mathcal{K}$. A context $E$
+will be in a closure of relation $R$ if it behaves well on values $v$ from $R$,
+that is if $E[v] \in \Obs$.
 
-Type safety: $\Obs = \rawSafe$
+Our new set of operators is following
+\begin{alignat*}{2}
+  \mathcal{E}R &= \{ e \mid \forall E \in \mathcal{K} R. E[e] \in \Obs \} \\
+  \mathcal{K}R &= \{ E \mid \forall v \in R. E[v] \in \Obs \}
+\end{alignat*}
+and denotation of types is standard
+\begin{alignat*}{2}
+  \Denot{\tau_1 \to \tau_2} &= \{ v \mid \forall v' \in \Denot{\tau_1}. v\_v' \in \mathcal{E}\Denot{\tau_2} \} \\
+  \Denot{\bot} &= \varnothing
+\end{alignat*}
 
-Termination: $\Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
-
+Now we just need to apply standard techniques to make the proof, so let us just
+look at selected proofs of compatibility lemmas.
 \begin{lemma}
   If $e_1 \in \mathcal{E}\Denot{\tau_2 \to \tau_1}$
   and $e_2 \in \mathcal{E}\Denot{\tau_2}$
@@ -162,6 +194,8 @@ Termination: $\Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
     by the fact that $v_1\in\Denot{\tau_2\to\tau_1}$
     and assumptions over $v_2$ and $E$.
 \end{proof}
+
+
 
 \begin{lemma}\label{lem:biortho_obs_red}.
   If $p \longrightarrow p'$ and $p' \in \Obs$, then $p \in \Obs.$
@@ -188,4 +222,5 @@ Termination: $\Obs = \{ p \mid \exists v. p \longrightarrow^* v\}$
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
+
 
