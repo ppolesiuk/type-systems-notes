@@ -194,8 +194,11 @@ look at selected proofs of compatibility lemmas.
     by the fact that $v_1\in\Denot{\tau_2\to\tau_1}$
     and assumptions over $v_2$ and $E$.
 \end{proof}
-
-
+here we have taken advantage of the fact that we defined contexts with
+plug operation "$[ \quad ]$" as inside-out zippers: we can perform a step
+forwards or backwards, getting bigger or smaller contexts with expressions
+plugged to them like in $E[e_1\;e_2] = (E\;e_2)[e_1]$ or
+$(E\;e_2)[v_1] = E[v_1\;e_2]$.
 
 \begin{lemma}\label{lem:biortho_obs_red}.
   If $p \longrightarrow p'$ and $p' \in \Obs$, then $p \in \Obs.$
