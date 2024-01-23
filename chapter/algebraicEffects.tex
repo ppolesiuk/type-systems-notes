@@ -1,6 +1,36 @@
 \chapter{Algebraic effects}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Motivation}
+
+% Pythagorean triples with backtracking in Helium
+\begin{verbatim}
+  effect BT = {
+    fail : unit => a
+    filp : unit => Bool
+  }
+
+  let rec select a b =
+    if a >= b then fail ()
+    else if flip () then a
+    else select (a + 1) b
+
+  let triples n =
+    let a = select 1 n in
+    let b = select 1 n in
+    let c = select 1 n in
+    if a*a + b*b = c*c then (a,b,c)
+    else fail ()
+
+  let allTriples n =
+    handle triples n with
+    | fail () => []
+    | flip () => resume True @ resume False
+    | return x => [x]
+    end
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Syntax and semantics}
 
 \newcommand\Do[2]{\texttt{do}_{#1}\;#2}
@@ -82,3 +112,44 @@ Type system:
              \Sigma;\Gamma\vdash e_1 : \tau / l\cdot\varepsilon \\ \Sigma;\Gamma, x : \tau_1, k : \tau_2 \to_\varepsilon\tau_0 \vdash e_2 : \tau_0 / \varepsilon}
             {\Sigma;\Gamma\vdash \HandleWith{l}{e_1}{\Handler{x}{k}{e_2}{x}{e_3}} : \tau_0 / \varepsilon}
 \end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Properties}
+
+\begin{theorem}[Progress]
+    If $\Sigma;\emptyset \vdash e:\tau/\varepsilon$, then one of the following holds:
+    \begin{enumerate}[label=(\roman*)]
+        \item $e\longrightarrow e'$
+        \item $e = v$ for some $v$
+        \item $e = E[\Do{l}{v}]$
+            for $l \not\in sp(E)$ and $l\in\varepsilon$
+    \end{enumerate}
+\end{theorem}
+
+\begin{theorem}[Preservation]
+    If $\Sigma;\emptyset \vdash e:\tau/\varepsilon$ and $e\longrightarrow e'$,\\
+    then $\Sigma';\emptyset \vdash e':\tau/\varepsilon$
+    (for some $\Sigma' \supseteq \Sigma$).
+\end{theorem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Polymorphism}
+
+Syntax:
+\begin{alignat*}{2}
+  e        & \Coloneqq \ldots \mid e\;* \\
+  v        & \Coloneqq \ldots \mid \Lambda e \\
+  \tau     & \Coloneqq \ldots \mid \forall\alpha.\tau \\
+  \epsilon & \Coloneqq \ldots \mid \alpha
+\end{alignat*}
+(variables are effect variables)
+
+Typing rules:
+\begin{mathpar}
+  \inferrule{\Delta,\alpha;\Sigma;\Gamma\vdash e : \tau / \emptyset}
+            {\Delta;\Sigma;\Gamma\vdash \Lambda e : \forall\alpha.\tau / \emptyset}
+    
+  \inferrule{\Delta;\Sigma;\Gamma\vdash e : \forall\alpha.\tau / \varepsilon}
+            {\Delta;\Sigma;\Gamma\vdash e\;* : \tau\{\varepsilon'/\alpha\} / \varepsilon}
+\end{mathpar}
+
