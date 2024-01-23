@@ -1,0 +1,84 @@
+\chapter{Algebraic effects}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Syntax and semantics}
+
+\newcommand\Do[2]{\texttt{do}_{#1}\;#2}
+\newcommand\HandleWith[3]{\texttt{handle}_{#1}\;#2\;\texttt{with}\;#3}
+\newcommand\Handler[5]{#1,#2\Rightarrow#3\;\texttt{return}\;#4\Rightarrow#5}
+\newcommand\Effect[2]{\texttt{effect}\;#1\;\texttt{in}\;#2}
+
+\begin{alignat*}{2}
+  e & \Coloneqq v \mid e\;e \mid \Do{l}{e} \mid \HandleWith{l}{e}{h} \mid \Effect{l}{e} \\
+  v & \Coloneqq x \mid \lambda x.e \mid () \\
+  h & \Coloneqq \Handler{x}{k}{e}{x}{e} \\
+  E & \Coloneqq \square \mid E\;e \mid v\;E \mid \HandleWith{l}{E}{h} \mid \Do{l}{E}
+\end{alignat*}
+
+\begin{alignat*}{2}
+  E[\Effect{l}{e}] & \longrightarrow E[e] \quad (l \text{ -- fresh in } E) \\
+  (\lambda x.e) & \rightharpoonup e\{v/x\} \\
+  \HandleWith{l}{v}{h} & \rightharpoonup e_2\{v/x\} \\
+  \HandleWith{l}{E[\Do{l}{v}]}{h} & \rightharpoonup e_1\{v/x, \lambda y.\HandleWith{l}{E[y]}{h}/k\} \quad (l \not\in sp(E)) \\
+  \text{where } \\ & h = \Handler{x}{k}{e_1}{x}{e_2}
+\end{alignat*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Type-and-effect system}
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq 1 \mid \tau \to_\varepsilon \tau \\
+  \varepsilon & \Coloneqq \emptyset \mid l \mid \varepsilon\cdot\varepsilon
+\end{alignat*}
+
+Effect row subtyping:
+
+\begin{mathpar}
+  \inferrule{}
+            {\emptyset <: \varepsilon}
+
+  \inferrule{}
+            {\varepsilon <: \varepsilon}
+
+  \inferrule{\varepsilon_1 <: \varepsilon_2 \\ \varepsilon_2 <: \varepsilon_3}
+            {\varepsilon_1 <: \varepsilon_3}
+  \\\\
+  \inferrule{\varepsilon_1 <: \varepsilon \\ \varepsilon_2 <: \varepsilon}
+            {\varepsilon_1\cdot\varepsilon_2 <: \varepsilon}
+
+  \inferrule{\varepsilon <: \varepsilon_1 \\ \varepsilon <: \varepsilon_2}
+            {\varepsilon <: \varepsilon_1\cdot\varepsilon_2}
+\end{mathpar}
+
+Function subtyping:
+
+\begin{mathpar}
+  \inferrule{\tau_2 <: \tau_1 \\ \tau_1' <: \tau_2' \\ \varepsilon_1 <: \varepsilon_2}
+            {\tau_1\to_{\varepsilon_1}\tau_1' <: \tau_2\to_{\varepsilon_2}\tau_2'}
+\end{mathpar}
+
+Type system:
+
+\begin{mathpar}
+  \inferrule{(x : \tau) \in \Gamma}
+            {\Sigma;\Gamma\vdash x : \tau / \emptyset}
+    
+  \inferrule{\Sigma;\Gamma, x : \tau_1 \vdash e : \tau_2 / \varepsilon}
+            {\Sigma;\Gamma\vdash \lambda x.e : \tau_1 \to_\varepsilon \tau_2 / \emptyset}
+  
+  \inferrule{\Sigma;\Gamma\vdash e_1 : \tau_2 \to_\varepsilon \tau_1 / \varepsilon \\ \Sigma;\Gamma\vdash e_2 : \tau_2 / \varepsilon}
+            {\Sigma;\Gamma\vdash e_1\;e_2 : \tau_1 / \varepsilon}
+
+  \inferrule{\Sigma;\Gamma\vdash e : \tau / \varepsilon \\ \tau <: \tau' \\ \varepsilon <: \varepsilon'}
+            {\Sigma;\Gamma\vdash e : \tau' / \varepsilon'}
+
+  \inferrule{\Sigma, l : \tau_1\Rightarrow\tau_2;\Gamma\vdash e : \tau / \varepsilon \\ l \not\in\varepsilon}
+            {\Sigma;\Gamma\vdash \Effect{l}{e} : \tau / \varepsilon}
+
+  \inferrule{(l : \tau_1\Rightarrow\tau_2) \in \Sigma \\ \Sigma;\Gamma\vdash e : \tau_1 / \varepsilon}
+            {\Sigma;\Gamma\vdash \Do{l}{e} : \tau_2 / l\cdot\varepsilon}
+  \\\\
+  \inferrule{(l : \tau_1\Rightarrow\tau_2) \in \Sigma \\ \Sigma;\Gamma, x : \tau \vdash e_3 : \tau_0 / \varepsilon \\\\
+             \Sigma;\Gamma\vdash e_1 : \tau / l\cdot\varepsilon \\ \Sigma;\Gamma, x : \tau_1, k : \tau_2 \to_\varepsilon\tau_0 \vdash e_2 : \tau_0 / \varepsilon}
+            {\Sigma;\Gamma\vdash \HandleWith{l}{e_1}{\Handler{x}{k}{e_2}{x}{e_3}} : \tau_0 / \varepsilon}
+\end{mathpar}
