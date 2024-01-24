@@ -1,4 +1,5 @@
 \chapter{Type Reconstruction}
+\label{ch:type-reconstruction}
 
 \newcommand\UVarX{?\!X}
 \newcommand\UVarY{?\!Y}
@@ -146,7 +147,7 @@ Then inference rules:
             {\Gamma\vdash e_1\;e_2 \Uparrow \tau_1 / \theta_2 \circ \theta_1}
 
   \\\\
-  
+
   % application - unification variable
   \inferrule{\Gamma\vdash e_1 \Uparrow \UVarX / \theta_1 \\ \theta_1'^*\Gamma\vdash e_2 \Downarrow \UVarY / \theta_2}
             {\Gamma\vdash e_1\;e_2 \Uparrow \theta_2^*(\UVarZ) / \theta_2 \circ \theta_1'}
