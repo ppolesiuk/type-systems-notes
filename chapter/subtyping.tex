@@ -3,30 +3,76 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Structural Subtyping}
 
-Subtyping rules:
+In this chapter we will model something that
+we already know from many programming languages.
+For example in C we can use variable of type \texttt{int}
+in place when \texttt{float} is needed.
+We will say that \texttt{int} is a \emph{subtype} of float
+and write it as $\texttt{int} <: \texttt{float}$.
+In Java we have class inheritance:
+\begin{verbatim}
+  class B extends A {
 
+  }
+\end{verbatim}
+An object of class \texttt{B} can be used as an object of class \texttt{A}.
+We can also look at modules in OCaml.
+A module of signature
+\begin{verbatim}
+  sig
+    val foo : t1
+    val bar : t2
+  end
+\end{verbatim}
+is smaller than a module of signature
+\begin{verbatim}
+  sig
+    val foo: t1
+  end
+\end{verbatim}
+The former can be used in any place that the latter is needed.
+As always we will define our new relation $<:$ using inference rules.
+This relation should be reflexive and transitive.
 \begin{mathpar}
   \inferrule{ }
             {\tau <: \tau}
 
   \inferrule{\tau_1 <: \tau_2 \\ \tau_2 <: \tau_3}
             {\tau_1 <: \tau_3}
+\end{mathpar}
 
+We can also add $\bot$ and $\top$ as the smallest and biggest types.
+\begin{mathpar}
   \inferrule{ }
             {\bot <: \tau}
 
   \inferrule{ }
             {\tau <: \top}
+\end{mathpar}
 
+Along with structural rules for arrow and product.
+\begin{mathpar}
   \inferrule{\tau_1' <: \tau_1 \\ \tau_2 <: \tau_2'}
             {\tau_1 \to \tau_2 <: \tau_1' \to \tau_2'}
 
   \inferrule{\tau_1 <: \tau_1' \\ \tau_2 <: \tau_2'}
             {\tau_1 \times \tau_2 <: \tau_1' \times \tau_2'}
 \end{mathpar}
+One thing to note here is that for arrow
+types at the negative positions need to be checked in the reverse order
+than those at the positive position.
 
-New typing rule (subsumption):
+Similarly when we would want to establish subtyping for mutable cells
+we need to both be able to read and write to them,
+which gives as a following inference rule
+\begin{mathpar}
+  \inferrule{\tau <: \tau' \\ \tau' <: \tau}
+            {\tau \texttt{ ref} <: \tau' \texttt{ ref}}.
+\end{mathpar}
 
+Lastly following our intuition about subtyping,
+that anything of a smaller type can be used when a bigger type is needed,
+we add new typing rule called \emph{subsumption}.
 \begin{mathpar}
   \inferrule{\Gamma \vdash e : \tau_1 \\ \tau_1 <: \tau_2}
             {\Gamma \vdash e : \tau_2}
@@ -35,6 +81,17 @@ New typing rule (subsumption):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Algorithmic Subtyping}
 
+When we extend our calculi one question that one should ask is
+what about type reconstruction.
+When looking at our new subsumption rule,
+we can see that there may be some problems.
+This rule is not controlled by syntax and
+it is not clear when it should be used.
+
+To resolve this problem we can try inferring
+the smallest possible type for a expression.
+Similarly to \autoref{ch:type-reconstruction}
+we will define two operations, namely bottom-up and top-down.
 \begin{mathpar}
   \inferrule{(x : \tau) \in \Gamma}
             {\Gamma \vdash x \Uparrow \tau}
@@ -57,14 +114,36 @@ New typing rule (subsumption):
   \inferrule{\Gamma \vdash e_1 \Downarrow \texttt{Bool} \\ \Gamma \vdash e_2 \Uparrow \tau_2 \\ \Gamma \vdash e_3 \Uparrow \tau_3}
             {\Gamma \vdash \texttt{if}\;e_1\;\texttt{then}\;e_2\;\texttt{else}\;e_3 \Uparrow \tau_2 \sqcup \tau_3}
 \end{mathpar}
-
+Most of those rules are pretty self-explanatory.
+In order to properly write inference rule for \texttt{if}
+we need to define two operations---\emph{join} and \emph{meet}
+denoted accordingly as $\sqcup$ and $\sqcap$.
+They will give as a supremum and infimum of their arguments.
+Here we give part of their definitions. The rest should be rather obvious.
 \begin{alignat*}{2}
   \bot \sqcup \tau & = \tau \\
   \top \sqcup \tau & = \top \\
-  (\tau_1 \times \tau_2) \sqcup (\tau_1' \times \tau_2') & = (\tau_1 \sqcup \tau_1') \times (\tau_2 \sqcup \tau_2') \\
-  (\tau_1 \to \tau_2) \sqcup (\tau_1' \to \tau_2') & = (\tau_1 \sqcap \tau_1') \to (\tau_2 \sqcup \tau_2') \\
-  (\tau_1 \times \tau_2) \sqcup (\tau_1' \to \tau_2') & = \top
+  (\tau_1 \times \tau_2) \sqcup (\tau_1' \times \tau_2') & =
+    (\tau_1 \sqcup \tau_1') \times (\tau_2 \sqcup \tau_2') \\
+  (\tau_1 \to \tau_2) \sqcup (\tau_1' \to \tau_2') & =
+    (\tau_1 \sqcap \tau_1') \to (\tau_2 \sqcup \tau_2') \\
+  (\tau_1 \times \tau_2) \sqcup (\tau_1' \to \tau_2') & = \top \\
+  \cdots \\
+  \bot \sqcap \tau & = \bot \\
+  \top \sqcap \tau & = \tau \\
+  \cdots
 \end{alignat*}
+
+The relation between $\Gamma \vdash e : \tau$
+and $\Gamma \vdash e \Uparrow \tau$ can be summed up in the following theorem.
+
+\begin{theorem}{\ }
+  \begin{thmenumerate}
+   \item If $\Gamma \vdash e \Uparrow \tau$, then $\Gamma \vdash e : \tau$.
+   \item If $\Gamma \vdash e : \tau$, then $\Gamma \vdash e \Uparrow \tau$'
+     for some $\tau' <: \tau$.
+ \end{thmenumerate}
+\end{theorem}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Coercion Semantics}
