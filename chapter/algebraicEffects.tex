@@ -95,10 +95,10 @@ Type system:
 \begin{mathpar}
   \inferrule{(x : \tau) \in \Gamma}
             {\Sigma;\Gamma\vdash x : \tau / \emptyset}
-    
+
   \inferrule{\Sigma;\Gamma, x : \tau_1 \vdash e : \tau_2 / \varepsilon}
             {\Sigma;\Gamma\vdash \lambda x.e : \tau_1 \to_\varepsilon \tau_2 / \emptyset}
-  
+
   \inferrule{\Sigma;\Gamma\vdash e_1 : \tau_2 \to_\varepsilon \tau_1 / \varepsilon \\ \Sigma;\Gamma\vdash e_2 : \tau_2 / \varepsilon}
             {\Sigma;\Gamma\vdash e_1\;e_2 : \tau_1 / \varepsilon}
 
@@ -151,8 +151,62 @@ Typing rules:
 \begin{mathpar}
   \inferrule{\Delta,\alpha;\Sigma;\Gamma\vdash e : \tau / \emptyset}
             {\Delta;\Sigma;\Gamma\vdash \Lambda e : \forall\alpha.\tau / \emptyset}
-    
+
   \inferrule{\Delta;\Sigma;\Gamma\vdash e : \forall\alpha.\tau / \varepsilon}
             {\Delta;\Sigma;\Gamma\vdash e\;* : \tau\{\varepsilon'/\alpha\} / \varepsilon}
 \end{mathpar}
 
+\begin{verbatim}
+  f : (unit -> unit) -> unit
+
+  effect tick in
+
+  count f g =
+    handle
+      f (\().tick (); g ())
+    with
+    | tick ()   => \n.resume () (n+1)
+    | return () => \n.n
+    end 0
+\end{verbatim}
+
+Problem: \texttt{f} may handle effect \texttt{tick}.
+
+\begin{mathpar}
+  \inferrule{(l : \tau_1\Rightarrow\tau_2) \in \Sigma \\
+             \Sigma;\Gamma, x : \tau \vdash e_3 :
+               \tau_0 / \varepsilon \setminus l \\\\
+             \Sigma;\Gamma\vdash e_1 : \tau / \varepsilon \\
+             \Sigma;\Gamma, x : \tau_1,
+               k : \tau_2 \to_{\varepsilon\setminus l} \tau_0 \vdash e_2 :
+               \tau_0 / \varepsilon\setminus l}
+            {\Sigma;\Gamma\vdash
+             \HandleWith{l}{e_1}{\Handler{x}{k}{e_2}{x}{e_3}} :
+             \tau_0 / \varepsilon}
+\end{mathpar}
+
+
+\begin{alignat*}{2}
+  \emptyset \setminus l &= \emptyset \\
+  (\varepsilon_1 \cdot \varepsilon_2) \setminus l &=
+    (\varepsilon_1 \setminus l) \cdot (\varepsilon_2 \setminus l)\\
+  l' \setminus l &= l', \text{ if } l \not= l'\\
+  l \setminus l  &= \emptyset
+\end{alignat*}
+
+Problem: What is $\alpha \setminus l$?
+
+\[
+  \varepsilon  \Coloneqq l \mid \emptyset \mid \varepsilon\cdot\varepsilon
+    \mid \alpha \setminus \{ \bar{l} \}
+\]
+
+\begin{alignat*}{2}
+  \alpha\setminus\{\bar{l}\}\setminus l' &= \alpha\setminus\{l', \bar{l}\}\\
+  \Subst{\left(\alpha\setminus\{\bar{l}\}\right)}{\varepsilon}{\alpha} &=
+    \varepsilon\setminus\{\bar{l}\}
+\end{alignat*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Further Reading}
