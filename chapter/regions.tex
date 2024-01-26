@@ -1,0 +1,69 @@
+\chapter{Regions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Syntax}
+
+\begin{alignat*}{2}
+  & e && \Coloneqq v \mid a\;@\;\rho \mid e\;e \mid \texttt{region}\;\rho\;\texttt{in}\;e \mid \pi_i\;e \mid \texttt{let}\;x\;=\;e\texttt{in}\;e \\
+  & a && \Coloneqq \lambda x.e \mid (e, e) \mid n \\
+  & v && \Coloneqq x \mid l_\rho \\
+  \syncatset{HVal} \ni\; & u && \Coloneqq \lambda x.e \mid \langle v, v \rangle \mid n
+\end{alignat*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Big step semantics}
+
+\[
+  h \in Heap = \syncatset{RVar} \partialmap \syncatset{Lbl} \partialmap \syncatset{HVal}
+\]
+
+\begin{mathpar}
+  \inferrule{ }
+            {h, v \Downarrow h, v}
+
+  \inferrule{l - fresh \\ h(\rho) \not= \bot}
+            {h, \lambda x.e\;@\;\rho \Downarrow h(\rho)[l \mapsto \lambda x.e], l}
+
+  \inferrule{h, e_1 \Downarrow h_1, v_1 \\ h_1, e_2 \Downarrow h_2, v_2 \\ l - fresh \\ h(\rho) \not= \bot}
+            {h, (e_1, e_2)\;@\;\rho \Downarrow h_2(\rho)[l \mapsto \langle v_1, v_2 \rangle], l}
+
+  \inferrule{h, e_1 \Downarrow h_1, l_\rho \\ h_1, e_2 \Downarrow h_2, v_2 \\ h_2(\rho)(l) = \lambda x.e \\ h_2, e\{v_2/x\} \Downarrow h_3, v }
+            {h, e_1\;e_2 \Downarrow h_3, v}
+
+  \inferrule{h[\rho \mapsto \emptyset], e \Downarrow h', v}
+            {h, \texttt{region}\;\rho\;\texttt{in}\;e \Downarrow h'\setminus \rho, v}
+\end{mathpar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Type system}
+
+\begin{alignat*}{2}
+  \tau & \Coloneqq Int \mid \mu \to_\varepsilon \mu \mid \forall\alpha.\tau \mid \mu \times \mu \\
+  \mu & \Coloneqq \tau\;@\;\rho \\
+  \varepsilon & \Coloneqq \alpha \mid \rho \mid \varepsilon\cdot\varepsilon \mid \emptyset \\
+  \Gamma & \Coloneqq \emptyset \mid \Gamma, x : \mu
+\end{alignat*}
+
+\begin{mathpar}
+  \inferrule{\Gamma(x) = \mu}
+            {\Delta;\Gamma\vdash x : \mu / \emptyset}
+
+  \inferrule{\Delta;\Gamma\vdash a : \tau / \varepsilon \\ \rho \in \Delta}
+            {\Delta;\Gamma\vdash a\;@\;\rho : \tau\;@\;\rho / \varepsilon\cdot\rho}
+
+  \inferrule{\Delta;\Gamma\vdash e_1 : (\mu_2\to_{\varepsilon_3}\mu_1)\;@\;\rho / \varepsilon_1 \\
+             \Delta;\Gamma\vdash e_2 : \mu / \varepsilon_2}
+            {\Delta;\Gamma\vdash e_1\;e_2 : \mu_1 / \varepsilon_1\cdot\varepsilon_2\cdot\varepsilon_3\cdot\rho}
+
+  \inferrule{\Delta,\rho;\Gamma\vdash e : \mu / \varepsilon}
+            {\Delta;\Gamma\vdash \texttt{region}\;\rho\;\texttt{in}\;e : \mu / \varepsilon\setminus\rho}
+
+  \inferrule{\Delta;\Gamma, x : \mu_1 \vdash e : \mu_2 / \varepsilon}
+            {\Delta;\Gamma\vdash \lambda x.e : \mu_1 \to_\varepsilon \mu_2 / \emptyset}
+
+  \inferrule{\Delta;\Gamma\vdash e_i : \mu_i / \varepsilon_i}
+            {\Delta;\Gamma\vdash (e_1, e_2) : \mu_1 \times \mu_2 / \varepsilon_1\cdot\varepsilon_2}
+
+  \inferrule{\Delta,\alpha;\Gamma\vdash a : \tau / \emptyset}
+            {\Delta;\Gamma\vdash a : \forall\alpha\tau / \emptyset}
+\end{mathpar}
