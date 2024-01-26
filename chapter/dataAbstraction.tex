@@ -3,15 +3,45 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Existential Types}
 
+\newcommand\Int[0]{\texttt{int}}
 \newcommand\Pack[1]{\texttt{pack}\;#1}
 \newcommand\Unpack[3]{\texttt{unpack}\;#1 = #2\;\texttt{in}\;#3}
 
+One of key features of modern computer languages, commonly associated with
+Object Oriented Programming, is the ability to abstract implementation details
+of data structures out, limiting the set of operations that a user can perform
+directly on this structure to those defined as an interface.
+In C++ this behaviour is implemented by classes while in OCaml it is achieved
+by using modules, for example:
+\begin{verbatim}
+    module M : sig
+        type t
+        val f : int -> t
+        val g : t -> int
+    end
+\end{verbatim}
+
+The main idea is to hide the actual type of the structure, that is to substitute
+it with a new, abstract type, about which no information is available,
+what forces the user to use only the methods we created. The type system,
+after the structure is defined, should only remember there exists a type, but
+forget all associations with the actual type. That is why we call such types
+\textit{existential types}.
+
+As usual, we augment our grammar by syntax of the types and two new operations:
+one for introduction of the type and one for its elimination.
 \begin{alignat*}{2}
   \tau & \Coloneqq \ldots \mid \exists\alpha.\tau \\
   e    & \Coloneqq \ldots \mid \Pack{e} \mid \Unpack{x}{e}{e} \\
   v    & \Coloneqq \ldots \mid \texttt{pack}\;v
 \end{alignat*}
 
+$\tau$ should be the type of the interface (i.e. of functions operating on
+$\alpha$). The module from above would be translated to
+$\exists \alpha.(\Int \to \alpha) \times (\alpha \to \Int)$.
+
+$\texttt{pack}$ creates the object of an abstract type and $\texttt{unpack}$
+opens it, making methods available (but it does not disclose the type $\alpha$).
 \begin{mathpar}
   \inferrule{\Delta; \Gamma \vdash e \colon \tau\{\tau'/\alpha\}}
             {\Delta; \Gamma \vdash \Pack{e} \colon \exists\alpha.\tau}
@@ -21,6 +51,7 @@
             {\Delta; \Gamma \vdash \Unpack{x}{e_1}{e_2} : \tau'}
 \end{mathpar}
 
+We have a standard reduction rule for unpacking a value.
 \begin{mathpar}
   \inferrule{ }
             {\Unpack{x}{\Pack{v}}{e} \rightharpoonup e\{v/x\}}
@@ -216,3 +247,4 @@ Before we get to the actual proof, we will show following lemma:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
+
