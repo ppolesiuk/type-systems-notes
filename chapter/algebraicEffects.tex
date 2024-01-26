@@ -209,4 +209,42 @@ Problem: What is $\alpha \setminus l$?
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Logical relations}
+
+Binary:
+
+\begin{alignat*}{2}
+  \semcatset{Type} & = \mathcal{P}(\syncatset{Value} \times \syncatset{Value}) \\
+  \semcatset{Effect} & = \mathcal{P}(\syncatset{Expr}^2 \times \mathcal{P}_{fin}(\syncatset{Label})^2 \times \semcatset{Type})
+\end{alignat*}
+
+Unary:
+
+\begin{alignat*}{2}
+  \semcatset{Type} & = \mathcal{P}(\syncatset{Value}) \\
+  \semcatset{Effect} & = \mathcal{P}(\syncatset{Expr} \times \mathcal{P}_{fin}(\syncatset{Label}) \times \semcatset{Type})
+\end{alignat*}
+
+\newcommand\DenotEnv[1]{\Denot{#1}^\theta_\eta}
+
+\begin{alignat*}{2}
+  \DenotEnv{\tau_1 \to_\varepsilon \tau_2} & =
+    \{v \mid \forall v' \in \DenotEnv{\tau_1}\ldotp v\;v' \in \mathcal{E}\DenotEnv{\tau_2}\DenotEnv{\varepsilon}\} \\
+\end{alignat*}
+
+\begin{alignat*}{2}
+  \DenotEnv{\emptyset} & = \emptyset \\
+  \DenotEnv{\varepsilon_1 \cdot \varepsilon_2} & = \DenotEnv{\varepsilon_1} \cup \DenotEnv{\varepsilon_2} \\
+  \DenotEnv{\alpha} & = \eta(\alpha) \\
+  \DenotEnv{l} & = \{(\Do{l}{v}, \{l\}, R_2) \mid v \in R_1 \land \theta(l) = (R_1, R_2) \} \\
+  \DenotEnv{\varepsilon \setminus l} & = \{(e, l, r) \in \DenotEnv{\varepsilon} \mid l \not\in L\}
+\end{alignat*}
+
+\begin{alignat*}{2}
+  \mathcal{E}R\,F & = \{e \mid \forall E \in \mathcal{K}R\,F \ldotp E[e] \in \Obs\} \\
+  \mathcal{K}R\,F & = \{E \mid (\forall v \in R \ldotp E[v] \in \Obs) \land (\forall e \in \mathcal{S}R\,F \ldotp E[e] \in \Obs)\} \\
+  \mathcal{S}R\,F & = \{E[e] \mid (e, L, R_0) \in F \land (\forall l \in L \ldotp l \not\in sp(E)) \land \forall v \in R_0 \ldotp E[v] \in \mathcal{E}R\,F\}
+\end{alignat*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Further Reading}
